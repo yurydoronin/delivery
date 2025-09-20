@@ -44,13 +44,18 @@ class StoragePlace private constructor(
      * - Объем заказа не превышает объем места хранения
      * - В месте хранения нет другого заказа
      */
-    fun canStore(orderVolume: Int) = isEmpty && (orderVolume <= totalVolume)
+    fun canStore(orderVolume: Int): StorageCheck = when {
+        !isEmpty -> StorageCheck.Occupied
+        orderVolume > totalVolume -> StorageCheck.NotEnoughSpace
+        else -> StorageCheck.Ok
+    }
 
     fun store(orderId: UUID, orderVolume: Int) {
-        require(canStore(orderVolume)) {
-            "Cannot put order: either storage is not empty or volume exceeded"
+        when (canStore(orderVolume)) {
+            is StorageCheck.Ok -> _orderId = orderId
+            is StorageCheck.Occupied -> throw IllegalArgumentException("Storage is already occupied")
+            is StorageCheck.NotEnoughSpace -> throw IllegalArgumentException("Order volume exceeds storage capacity")
         }
-        _orderId = orderId
     }
 
     /**
@@ -68,6 +73,12 @@ class StoragePlace private constructor(
  */
 enum class StoragePlaceName(val displayName: String) {
     BACKPACK("рюкзак"),
-    TRUNK("багажник")
+    TRUNK("багажник"),
+}
+
+sealed class StorageCheck {
+    object Ok : StorageCheck()
+    object Occupied : StorageCheck()
+    object NotEnoughSpace : StorageCheck()
 }
 
