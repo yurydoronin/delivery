@@ -6,7 +6,7 @@ import kotlin.test.*
 class StoragePlaceTest {
 
     @Test
-    fun `a factory creates StoragePlace with correct properties`() {
+    fun `creates storage with correct properties`() {
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 10)
 
         assertEquals(StoragePlaceName.BACKPACK, sp.name)
@@ -16,7 +16,7 @@ class StoragePlaceTest {
     }
 
     @Test
-    fun `a factory throws an exception if totalVolume is not positive`() {
+    fun `fails if total volume is not positive`() {
         val exception = assertFailsWith<IllegalArgumentException> {
             StoragePlace.of(StoragePlaceName.TRUNK, 0)
         }
@@ -25,42 +25,45 @@ class StoragePlaceTest {
     }
 
     @Test
-    fun `a storage is empty when no order is stored`() {
+    fun `can store order if empty and fits`() {
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 5)
 
-        assertTrue(sp.canStore(3))
+        assertTrue(sp.canStore(3) is StorageCheck.Ok)
     }
 
     @Test
-    fun `returns false if a storage is occupied`() {
+    fun `cannot store order if occupied`() {
         val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5)
 
-        assertFalse(sp.canStore(3))
-        assertNotNull(sp.orderId)
+        val check = sp.canStore(3)
+
+        assertTrue(check is StorageCheck.Occupied)
         assertEquals(orderId, sp.orderId)
     }
 
     @Test
-    fun `returns false if an order volume exceeds storage`() {
+    fun `cannot store order if volume exceeds capacity`() {
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 5)
 
-        assertFalse(sp.canStore(10))
+        val check = sp.canStore(10)
+
+        assertTrue(check is StorageCheck.NotEnoughSpace)
     }
 
     @Test
-    fun `puts order into an empty storage if volume fits`() {
+    fun `cannot store another order if already occupied`() {
         val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 8)
 
         assertEquals(orderId, sp.orderId)
-        assertFalse(sp.canStore(2))
+        assertTrue(sp.canStore(2) is StorageCheck.Occupied)
     }
 
     @Test
-    fun `throws an exception if a storage is occupied`() {
+    fun `fails to store if occupied`() {
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 10)
         val firstOrder = UUID.randomUUID()
         sp.store(firstOrder, 5)
@@ -69,23 +72,21 @@ class StoragePlaceTest {
         val exception = assertFailsWith<IllegalArgumentException> {
             sp.store(secondOrder, 5)
         }
-
-        assertTrue(exception.message!!.contains("Cannot put order: either storage is not empty or volume exceeded"))
+        assertEquals("Storage is already occupied", exception.message)
     }
 
     @Test
-    fun `throws an exception if an order volume exceeds totalVolume`() {
+    fun `fails to store if volume exceeds capacity`() {
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 10)
 
         val exception = assertFailsWith<IllegalArgumentException> {
             sp.store(UUID.randomUUID(), 15)
         }
-
-        assertTrue(exception.message!!.contains("Cannot put order: either storage is not empty or volume exceeded"))
+        assertEquals("Order volume exceeds storage capacity", exception.message)
     }
 
     @Test
-    fun `removes an order and makes a storage empty`() {
+    fun `clears order and frees storage`() {
         val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5)
@@ -93,8 +94,7 @@ class StoragePlaceTest {
         val extracted = sp.clear()
 
         assertEquals(orderId, extracted)
-        assertTrue(sp.canStore(5))
+        assertTrue(sp.canStore(5) is StorageCheck.Ok)
         assertNull(sp.orderId)
     }
-
 }

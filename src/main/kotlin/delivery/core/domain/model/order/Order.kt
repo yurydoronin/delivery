@@ -1,0 +1,52 @@
+package delivery.core.domain.model.order
+
+import common.types.base.Aggregate
+import delivery.core.domain.kernel.Location
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.Table
+import java.util.UUID
+
+@Entity
+@Table(name = "orders")
+class Order private constructor(
+    id: UUID,
+    val location: Location,
+    val volume: Int
+) : Aggregate<UUID>(id) {
+
+    @Column(name = "status", nullable = false)
+    private var _status: OrderStatus = OrderStatus.CREATED
+    val status: OrderStatus
+        get() = _status
+
+    @Column(name = "courier_id")
+    private var _courierId: UUID? = null
+    val courierId: UUID?
+        get() = _courierId
+
+    companion object {
+        fun of(id: UUID, location: Location, volume: Int): Order {
+            require(volume > 0) { "Volume must be positive" }
+            return Order(id, location, volume)
+        }
+    }
+
+    fun assignToCourier(courierId: UUID) {
+        require(_status == OrderStatus.CREATED) { "Only orders in CREATED status can be assigned" }
+        _courierId = courierId
+        _status = OrderStatus.ASSIGNED
+    }
+
+    fun complete() {
+        require(_status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
+        require(_courierId != null) { "Cannot complete an order without an assigned courier" }
+        _status = OrderStatus.COMPLETED
+    }
+}
+
+enum class OrderStatus {
+    CREATED,
+    ASSIGNED,
+    COMPLETED
+}
