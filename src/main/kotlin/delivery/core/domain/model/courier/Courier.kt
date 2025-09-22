@@ -18,7 +18,7 @@ class Courier private constructor(
      */
     @Column(nullable = false)
     val speed: Int,
-    @Column(nullable = false)
+    @Embedded
     var location: Location,
 ) : Aggregate<UUID>(UUID.randomUUID()) {
 

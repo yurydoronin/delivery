@@ -1,12 +1,14 @@
 package delivery.core.domain.kernel
 
 import common.types.base.ValueObject
+import jakarta.persistence.Embeddable
 import kotlin.math.abs
 
 /**
  * Location - это координата на доске, она состоит из X (горизонталь) и Y (вертикаль)
  */
 @ConsistentCopyVisibility
+@Embeddable
 data class Location private constructor(
     val x: Int,
     val y: Int
