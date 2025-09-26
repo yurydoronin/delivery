@@ -36,8 +36,7 @@ class StoragePlace private constructor(
     /**
      * Место хранения считается пустым, если OrderId не установлен.
      */
-    private val isEmpty: Boolean
-        get() = _orderId == null
+    val isEmpty get() = orderId == null
 
     /**
      * Поместить заказ в место хранения можно только, если:

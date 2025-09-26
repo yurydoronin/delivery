@@ -102,7 +102,7 @@ class CourierTest {
     }
 
     @Test
-    fun `fails to completes order`() {
+    fun `fails to complete order`() {
         val courier = Courier.of("John", 2, Location.of(1, 1))
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
 
