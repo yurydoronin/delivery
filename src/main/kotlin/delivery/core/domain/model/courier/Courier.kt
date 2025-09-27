@@ -1,6 +1,11 @@
 package delivery.core.domain.model.courier
 
+import arrow.core.Either
+import arrow.core.flatMap
+import arrow.core.left
+import arrow.core.right
 import common.types.base.Aggregate
+import common.types.error.BusinessError
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.order.Order
 import jakarta.persistence.*
@@ -52,20 +57,20 @@ class Courier private constructor(
     /**
      * Курьер может взять заказ, если в одном из его мест хранения есть место.
      */
-    fun findAvailableStorage(order: Order) =
-        _storagePlaces.find { it.canStore(order.volume) is StorageCheck.Ok }
-            ?: throw IllegalArgumentException("No available storage for this order")
+    fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> =
+        _storagePlaces
+            .firstOrNull { it.canStore(order.volume) == StorageCheck.Ok }
+            ?.right() ?: CourierError.NoAvailableStorage.left()
 
-    fun takeOrder(order: Order) {
-        val place = findAvailableStorage(order)
-        place.store(order.id, order.volume)
-    }
+    fun takeOrder(order: Order): Either<BusinessError, Unit> =
+        findAvailableStorage(order).flatMap { place ->
+            place.store(order.id, order.volume)
+        }
 
-    fun completeOrder(order: Order) {
-        val place = _storagePlaces.firstOrNull { it.orderId == order.id }
-            ?: throw IllegalArgumentException("Order not found in any storage")
-        place.clear()
-    }
+    fun completeOrder(order: Order): Either<CourierError, Unit> =
+        _storagePlaces.firstOrNull { it.orderId == order.id }
+            ?.also { it.clear() }
+            ?.let { Unit.right() } ?: CourierError.OrderNotFound.left()
 
     /**
      * Возвращает количество шагов (тактов), необходимое для доставки до цели
@@ -92,3 +97,7 @@ class Courier private constructor(
     }
 }
 
+sealed class CourierError(override val message: String) : BusinessError {
+    data object NoAvailableStorage : CourierError("No available storage for this order")
+    data object OrderNotFound : CourierError("Order not found in any storage")
+}

@@ -24,12 +24,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
+    // Arrow.Either
+    implementation("io.arrow-kt:arrow-core:2.1.2")
+
     // Logging
     implementation("org.zalando:logbook-spring-boot-starter:3.12.2")
 
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.14.5")
     testImplementation("org.junit.jupiter:junit-jupiter:5.13.4")
+    testImplementation("io.kotest:kotest-assertions-arrow-jvm:6.0.3")
 }
 
 tasks.test {

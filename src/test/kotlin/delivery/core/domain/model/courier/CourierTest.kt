@@ -2,6 +2,10 @@ package delivery.core.domain.model.courier
 
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.order.Order
+import io.kotest.assertions.arrow.core.shouldBeLeft
+import io.kotest.assertions.arrow.core.shouldBeRight
+import io.kotest.matchers.shouldBe
+import io.kotest.matchers.types.shouldBeInstanceOf
 import java.util.UUID
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -53,63 +57,81 @@ class CourierTest {
 
     @Test
     fun `finds available storage for order`() {
+        // Arrange
         val startLocation = Location.of(1, 1)
         val courier = Courier.of("John", 2, startLocation)
         val storageDefault = courier.storagePlaces.first()
         val order = Order.of(UUID.randomUUID(), startLocation, 5)
 
-        val storage = courier.findAvailableStorage(order)
+        // Act
+        val result = courier.findAvailableStorage(order)
 
-        assertTrue(storage.canStore(order.volume) is StorageCheck.Ok)
-        assertEquals(storageDefault, storage)
-
+        // Assert
+        val storage = result.shouldBeRight()
+        storage shouldBe storageDefault
+        storage.canStore(order.volume).shouldBeInstanceOf<StorageCheck.Ok>()
     }
 
     @Test
-    fun `fails to take order if no storage available`() {
+    fun `fails to find storage for large order`() {
+        // Arrange
         val startLocation = Location.of(1, 1)
         val courier = Courier.of("John", 2, startLocation)
         val largeOrder = Order.of(UUID.randomUUID(), Location.of(1, 1), 15)
 
-        val exception = assertFailsWith<IllegalArgumentException> {
-            courier.takeOrder(largeOrder)
-        }
-        assertTrue(exception.message!!.contains("No available storage"))
+        // Act
+        val result = courier.findAvailableStorage(largeOrder)
+
+        // Assert
+        val error = result.shouldBeLeft()
+        error shouldBe CourierError.NoAvailableStorage
+        error.message shouldBe "No available storage for this order"
     }
 
     @Test
-    fun `takes order`() {
-        val startLocation = Location.of(1, 1)
-        val courier = Courier.of("John", 2, startLocation)
+    fun `takes order successfully`() {
+        // Arrange
+        val courier = Courier.of("John", 2, Location.of(1, 1))
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
 
-        courier.takeOrder(order)
+        // Act
+        val result = courier.takeOrder(order)
 
+        // Assert
+        result.shouldBeRight()
         val place = courier.storagePlaces.first { it.orderId == order.id }
         assertEquals(order.id, place.orderId)
     }
 
     @Test
     fun `completes order`() {
+        // Arrange
         val startLocation = Location.of(1, 1)
         val courier = Courier.of("John", 2, startLocation)
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
         courier.takeOrder(order)
 
-        courier.completeOrder(order)
+        // Act
+        val result = courier.completeOrder(order)
 
+        // Assert
+        result.shouldBeRight()
         assertTrue(courier.storagePlaces.all { it.orderId == null })
     }
 
     @Test
-    fun `fails to completes order`() {
+    fun `fails to complete order`() {
+        // Arrange
         val courier = Courier.of("John", 2, Location.of(1, 1))
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
 
-        val exception = assertFailsWith<IllegalArgumentException> {
-            courier.completeOrder(order)
-        }
-        assertTrue(exception.message!!.contains("Order not found in any storage"))
+        // Act
+        val result = courier.completeOrder(order)
+
+        // Assert
+        val error = result.shouldBeLeft()
+        error shouldBe CourierError.OrderNotFound
+        error.message shouldBe "Order not found in any storage"
     }
 
     @Test

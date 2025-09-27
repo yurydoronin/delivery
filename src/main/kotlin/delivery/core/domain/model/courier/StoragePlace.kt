@@ -1,6 +1,10 @@
 package delivery.core.domain.model.courier
 
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
 import common.types.base.DomainEntity
+import common.types.error.BusinessError
 import jakarta.persistence.*
 import java.util.UUID
 
@@ -36,8 +40,7 @@ class StoragePlace private constructor(
     /**
      * Место хранения считается пустым, если OrderId не установлен.
      */
-    private val isEmpty: Boolean
-        get() = _orderId == null
+    val isEmpty get() = orderId == null
 
     /**
      * Поместить заказ в место хранения можно только, если:
@@ -50,13 +53,15 @@ class StoragePlace private constructor(
         else -> StorageCheck.Ok
     }
 
-    fun store(orderId: UUID, orderVolume: Int) {
+    fun store(orderId: UUID, orderVolume: Int): Either<StorageError, Unit> =
         when (canStore(orderVolume)) {
-            is StorageCheck.Ok -> _orderId = orderId
-            is StorageCheck.Occupied -> throw IllegalArgumentException("Storage is already occupied")
-            is StorageCheck.NotEnoughSpace -> throw IllegalArgumentException("Order volume exceeds storage capacity")
+            is StorageCheck.Ok -> {
+                _orderId = orderId
+                Unit.right()
+            }
+            is StorageCheck.Occupied -> StorageError.Occupied.left()
+            is StorageCheck.NotEnoughSpace -> StorageError.NotEnoughSpace.left()
         }
-    }
 
     /**
      * Извлечение заказа из места хранения
@@ -82,3 +87,7 @@ sealed class StorageCheck {
     object NotEnoughSpace : StorageCheck()
 }
 
+sealed class StorageError(override val message: String) : BusinessError {
+    data object Occupied : StorageError("Storage is already occupied")
+    data object NotEnoughSpace : StorageError("Order volume exceeds storage capacity")
+}
