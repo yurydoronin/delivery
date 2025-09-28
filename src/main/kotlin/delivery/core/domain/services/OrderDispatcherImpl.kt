@@ -17,7 +17,7 @@ class OrderDispatcherImpl : OrderDispatcher {
         require(order.status == OrderStatus.CREATED) { "Order must be in CREATED status" }
 
         val winner = couriers
-            .filter { it.storagePlaces.any { sp -> sp.canStore(order.volume) is StorageCheck.Ok } }
+            .filter { it.storagePlaces.any { sp -> sp.canStore(order.volume) == StorageCheck.Ok } }
             .minByOrNull { it.calculateTimeToLocation(order.location) }
             ?: return DispatchError.NoAvailableCourier.left()
 
