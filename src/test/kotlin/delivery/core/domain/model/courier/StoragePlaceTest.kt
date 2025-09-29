@@ -1,5 +1,7 @@
 package delivery.core.domain.model.courier
 
+import io.kotest.assertions.arrow.core.shouldBeLeft
+import io.kotest.matchers.shouldBe
 import java.util.UUID
 import kotlin.test.*
 
@@ -64,25 +66,33 @@ class StoragePlaceTest {
 
     @Test
     fun `fails to store if occupied`() {
+        // Arrange
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 10)
         val firstOrder = UUID.randomUUID()
         sp.store(firstOrder, 5)
         val secondOrder = UUID.randomUUID()
 
-        val exception = assertFailsWith<IllegalArgumentException> {
-            sp.store(secondOrder, 5)
-        }
-        assertEquals("Storage is already occupied", exception.message)
+        // Act
+        val result = sp.store(secondOrder, 5)
+
+        // Assert
+        val error = result.shouldBeLeft()
+        error shouldBe StorageError.Occupied
+        error.message shouldBe "Storage is already occupied"
     }
 
     @Test
     fun `fails to store if volume exceeds capacity`() {
+        // Arrange
         val sp = StoragePlace.of(StoragePlaceName.BACKPACK, 10)
 
-        val exception = assertFailsWith<IllegalArgumentException> {
-            sp.store(UUID.randomUUID(), 15)
-        }
-        assertEquals("Order volume exceeds storage capacity", exception.message)
+        // Act
+        val result = sp.store(UUID.randomUUID(), 15)
+
+        // Assert
+        val error = result.shouldBeLeft()
+        error shouldBe StorageError.NotEnoughSpace
+        error.message shouldBe "Order volume exceeds storage capacity"
     }
 
     @Test
