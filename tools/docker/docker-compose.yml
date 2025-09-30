@@ -1,0 +1,23 @@
+services:
+
+  postgres:
+    restart: always
+    image: postgres:latest
+    container_name: postgres
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=12345
+
+  flyway:
+    image: delivery_migrations:latest
+    container_name: delivery_migrations
+    environment:
+      - FLYWAY_URL=jdbc:postgresql://postgres:5432/delivery
+      - FLYWAY_USER=postgres
+      - FLYWAY_PASSWORD=12345
+    depends_on:
+      - postgres
