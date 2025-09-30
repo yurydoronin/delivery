@@ -3,6 +3,7 @@ package delivery.core.domain.model.order
 import common.types.base.Aggregate
 import delivery.core.domain.kernel.Location
 import jakarta.persistence.Column
+import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.Table
 import java.util.UUID
@@ -11,6 +12,7 @@ import java.util.UUID
 @Table(name = "orders")
 class Order private constructor(
     id: UUID,
+    @Embedded
     val location: Location,
     val volume: Int
 ) : Aggregate<UUID>(id) {
