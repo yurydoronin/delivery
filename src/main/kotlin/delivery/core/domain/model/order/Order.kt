@@ -5,6 +5,8 @@ import delivery.core.domain.kernel.Location
 import jakarta.persistence.Column
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.Table
 import java.util.UUID
 
@@ -17,6 +19,7 @@ class Order private constructor(
     val volume: Int
 ) : Aggregate<UUID>(id) {
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private var _status: OrderStatus = OrderStatus.CREATED
     val status: OrderStatus
