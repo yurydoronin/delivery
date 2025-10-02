@@ -23,7 +23,6 @@ class CourierRepository(
             "Courier with id ${courier.id} already exists"
         }
         aggregateTracker.track(courier)
-        repository.save(courier)
     }
 
     override fun update(courier: Courier) {
@@ -31,7 +30,6 @@ class CourierRepository(
             "Cannot update non-existent courier with id ${courier.id}"
         }
         aggregateTracker.track(courier)
-        repository.save(courier)
     }
 
     override fun get(courierId: UUID): Courier? = repository.findByIdOrNull(courierId)

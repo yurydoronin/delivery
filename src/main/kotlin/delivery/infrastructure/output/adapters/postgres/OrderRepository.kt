@@ -24,7 +24,6 @@ class OrderRepository(
             "Order with id ${order.id} already exists"
         }
         aggregateTracker.track(order)
-        repository.save(order)
     }
 
     override fun update(order: Order) {
@@ -32,7 +31,6 @@ class OrderRepository(
             "Cannot update non-existent order with id ${order.id}"
         }
         aggregateTracker.track(order)
-        repository.save(order)
     }
 
     override fun get(orderId: UUID): Order? = repository.findByIdOrNull(orderId)
