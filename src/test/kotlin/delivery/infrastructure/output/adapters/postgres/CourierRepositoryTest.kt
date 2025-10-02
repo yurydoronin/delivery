@@ -15,17 +15,11 @@ import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.transaction.annotation.Transactional
-import org.testcontainers.junit.jupiter.Testcontainers
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@Transactional
 class CourierRepositoryTest @Autowired constructor(
     private val unitOfWork: UnitOfWork,
     private val courierRepository: CourierRepository
-) {
+) : BaseRepositoryTest() {
     // relaxed = true позволяет не писать `every { aggregateTracker.track(any()) } just runs` явно
     @MockkBean(relaxed = true)
     lateinit var aggregateTracker: AggregateTracker
