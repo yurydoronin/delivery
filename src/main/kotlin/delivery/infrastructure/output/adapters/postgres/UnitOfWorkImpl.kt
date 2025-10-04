@@ -18,8 +18,8 @@ class UnitOfWorkImpl(
     override fun commit() {
         tracker.getTracked().forEach { aggregate ->
             when (aggregate) {
-                is Courier -> courierRepository.save(aggregate)
-                is Order -> orderRepository.save(aggregate)
+                is Courier -> courierRepository.repository.save(aggregate)
+                is Order -> orderRepository.repository.save(aggregate)
             }
         }
         tracker.clear()

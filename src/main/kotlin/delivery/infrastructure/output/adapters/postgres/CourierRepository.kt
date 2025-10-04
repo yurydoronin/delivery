@@ -13,17 +13,11 @@ class CourierRepository(
     val repository: CourierJpaRepository
 ) : CourierRepositoryPort {
 
-    override fun save(courier: Courier) {
-        aggregateTracker.track(courier)
-        repository.save(courier)
-    }
-
     override fun add(courier: Courier) {
         require(!repository.existsById(courier.id)) {
             "Courier with id ${courier.id} already exists"
         }
         aggregateTracker.track(courier)
-        repository.save(courier)
     }
 
     override fun update(courier: Courier) {
@@ -31,7 +25,6 @@ class CourierRepository(
             "Cannot update non-existent courier with id ${courier.id}"
         }
         aggregateTracker.track(courier)
-        repository.save(courier)
     }
 
     override fun get(courierId: UUID): Courier? = repository.findByIdOrNull(courierId)

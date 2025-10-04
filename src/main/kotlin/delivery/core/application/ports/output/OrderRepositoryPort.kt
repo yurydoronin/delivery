@@ -5,7 +5,6 @@ import java.util.UUID
 
 interface OrderRepositoryPort {
 
-    fun save(order: Order)
     fun add(order: Order)
     fun update(order: Order)
     fun get(orderId: UUID): Order?

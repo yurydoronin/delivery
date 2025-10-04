@@ -11,6 +11,7 @@ import io.kotest.matchers.collections.shouldContainAll
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
@@ -21,24 +22,9 @@ class OrderRepositoryTest @Autowired constructor(
     private val orderRepository: OrderRepository,
     private val courierRepository: CourierRepository
 ) : BaseRepositoryTest() {
+
     @MockkBean(relaxed = true)
     lateinit var aggregateTracker: AggregateTracker
-
-    @Test
-    fun `save order`() {
-        // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
-
-        // Act
-        orderRepository.save(order)
-        unitOfWork.commit()
-
-        // Assert
-        val saved = orderRepository.get(order.id)
-        saved shouldNotBe null
-        saved!!.volume shouldBe 5
-        verify { aggregateTracker.track(order) }
-    }
 
     @Test
     fun `add new order`() {
@@ -47,6 +33,7 @@ class OrderRepositoryTest @Autowired constructor(
 
         // Act
         orderRepository.add(order)
+        every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
         // Assert
@@ -63,11 +50,13 @@ class OrderRepositoryTest @Autowired constructor(
         orderRepository.add(order)
         val courier = Courier.of("Вася", 2, Location.of(2, 2))
         courierRepository.add(courier)
+        every { aggregateTracker.getTracked() } returns listOf(order, courier)
         unitOfWork.commit()
         order.assignToCourier(courier.id)
 
         // Act
         orderRepository.update(order)
+        every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
         // Assert
@@ -82,7 +71,8 @@ class OrderRepositoryTest @Autowired constructor(
     fun `get order by id`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 10)
-        orderRepository.save(order)
+        orderRepository.add(order)
+        every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
         // Act
@@ -102,6 +92,7 @@ class OrderRepositoryTest @Autowired constructor(
         val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
         orderRepository.add(order1)
         orderRepository.add(order2)
+        every { aggregateTracker.getTracked() } returns listOf(order1, order2)
         unitOfWork.commit()
 
         // Act
@@ -123,17 +114,20 @@ class OrderRepositoryTest @Autowired constructor(
         orderRepository.add(order1)
         orderRepository.add(order2)
         orderRepository.add(order3)
+        every { aggregateTracker.getTracked() } returns listOf(order1, order2, order3)
         unitOfWork.commit()
 
         val courier1 = Courier.of("Вася", 2, Location.of(2, 2))
         val courier2 = Courier.of("Петя", 2, Location.of(5, 5))
         courierRepository.add(courier1)
         courierRepository.add(courier2)
+        every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)
         unitOfWork.commit()
         order1.assignToCourier(courier1.id)
         order2.assignToCourier(courier2.id)
         orderRepository.update(order1)
         orderRepository.update(order2)
+        every { aggregateTracker.getTracked() } returns listOf(order1, order2)
         unitOfWork.commit()
 
         // Act

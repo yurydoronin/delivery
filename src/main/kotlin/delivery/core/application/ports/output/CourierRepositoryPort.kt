@@ -5,7 +5,6 @@ import java.util.UUID
 
 interface CourierRepositoryPort {
 
-    fun save(courier: Courier)
     fun add(courier: Courier)
     fun update(courier: Courier)
     fun get(courierId: UUID): Courier?

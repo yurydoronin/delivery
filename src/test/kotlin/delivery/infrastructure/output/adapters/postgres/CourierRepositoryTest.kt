@@ -11,6 +11,7 @@ import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.collections.shouldNotContain
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.verify
 import java.util.UUID
 import kotlin.test.Test
@@ -25,29 +26,13 @@ class CourierRepositoryTest @Autowired constructor(
     lateinit var aggregateTracker: AggregateTracker
 
     @Test
-    fun `save courier`() {
-        // Arrange
-        val courier = Courier.of("Сохраняемый", 1, Location.of(1, 1))
-
-        // Act
-        courierRepository.save(courier)
-        unitOfWork.commit()
-
-        // Assert
-        val saved = courierRepository.get(courier.id)
-        saved shouldNotBe null
-        saved!!.name shouldBe "Сохраняемый"
-        verify { aggregateTracker.track(courier) }
-    }
-
-
-    @Test
     fun `add new courier`() {
         // Arrange
         val courier = Courier.of("Новый", 3, Location.of(1, 1))
 
         // Act
         courierRepository.add(courier)
+        every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
         val newCourier = courierRepository.get(courier.id)
@@ -61,6 +46,7 @@ class CourierRepositoryTest @Autowired constructor(
         // Arrange
         val courier = Courier.of("Обновляемый", 2, Location.of(2, 2))
         courierRepository.add(courier)
+        every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
         val updatedLocation = Location.of(5, 5)
@@ -68,6 +54,7 @@ class CourierRepositoryTest @Autowired constructor(
 
         // Act
         courierRepository.update(courier)
+        every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
         // Assert
@@ -80,7 +67,8 @@ class CourierRepositoryTest @Autowired constructor(
     fun `get courier`() {
         // Arrange
         val courier = Courier.of("Иван", 3, Location.of(1, 1))
-        courierRepository.save(courier)
+        courierRepository.add(courier)
+        every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
         // Act
@@ -105,6 +93,7 @@ class CourierRepositoryTest @Autowired constructor(
         courierRepository.add(free1)
         courierRepository.add(free2)
         courierRepository.add(busy)
+        every { aggregateTracker.getTracked() } returns listOf(free1, free2, busy)
         unitOfWork.commit()
 
         // Act
