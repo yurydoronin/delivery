@@ -9,21 +9,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class CourierRepository(
-    val aggregateTracker: AggregateTracker,
-    val repository: CourierJpaRepository
+    private val aggregateTracker: AggregateTracker,
+    private val repository: CourierJpaRepository
 ) : CourierRepositoryPort {
 
-    override fun add(courier: Courier) {
-        require(!repository.existsById(courier.id)) {
-            "Courier with id ${courier.id} already exists"
-        }
-        aggregateTracker.track(courier)
-    }
-
-    override fun update(courier: Courier) {
-        require(repository.existsById(courier.id)) {
-            "Cannot update non-existent courier with id ${courier.id}"
-        }
+    override fun track(courier: Courier) {
         aggregateTracker.track(courier)
     }
 

@@ -10,16 +10,16 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class UnitOfWorkImpl(
     val tracker: AggregateTracker,
-    val courierRepository: CourierRepository,
-    val orderRepository: OrderRepository
+    val courierRepository: CourierJpaRepository,
+    val orderRepository: OrderJpaRepository
 ) : UnitOfWork {
 
     @Transactional
     override fun commit() {
         tracker.getTracked().forEach { aggregate ->
             when (aggregate) {
-                is Courier -> courierRepository.repository.save(aggregate)
-                is Order -> orderRepository.repository.save(aggregate)
+                is Courier -> courierRepository.save(aggregate)
+                is Order -> orderRepository.save(aggregate)
             }
         }
         tracker.clear()

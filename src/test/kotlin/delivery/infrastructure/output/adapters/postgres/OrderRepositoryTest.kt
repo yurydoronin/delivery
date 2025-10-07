@@ -32,7 +32,7 @@ class OrderRepositoryTest @Autowired constructor(
         val order = Order.of(UUID.randomUUID(), Location.of(2, 2), 3)
 
         // Act
-        orderRepository.add(order)
+        orderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
@@ -47,15 +47,15 @@ class OrderRepositoryTest @Autowired constructor(
     fun `update existing order`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 2)
-        orderRepository.add(order)
+        orderRepository.track(order)
         val courier = Courier.of("Вася", 2, Location.of(2, 2))
-        courierRepository.add(courier)
+        courierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(order, courier)
         unitOfWork.commit()
         order.assignToCourier(courier.id)
 
         // Act
-        orderRepository.update(order)
+        orderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
@@ -71,7 +71,7 @@ class OrderRepositoryTest @Autowired constructor(
     fun `get order by id`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 10)
-        orderRepository.add(order)
+        orderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
@@ -90,8 +90,8 @@ class OrderRepositoryTest @Autowired constructor(
         // Arrange
         val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
         val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
-        orderRepository.add(order1)
-        orderRepository.add(order2)
+        orderRepository.track(order1)
+        orderRepository.track(order2)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2)
         unitOfWork.commit()
 
@@ -111,22 +111,22 @@ class OrderRepositoryTest @Autowired constructor(
         val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
         val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
         val order3 = Order.of(UUID.randomUUID(), Location.of(3, 3), 3)
-        orderRepository.add(order1)
-        orderRepository.add(order2)
-        orderRepository.add(order3)
+        orderRepository.track(order1)
+        orderRepository.track(order2)
+        orderRepository.track(order3)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2, order3)
         unitOfWork.commit()
 
         val courier1 = Courier.of("Вася", 2, Location.of(2, 2))
         val courier2 = Courier.of("Петя", 2, Location.of(5, 5))
-        courierRepository.add(courier1)
-        courierRepository.add(courier2)
+        courierRepository.track(courier1)
+        courierRepository.track(courier2)
         every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)
         unitOfWork.commit()
         order1.assignToCourier(courier1.id)
         order2.assignToCourier(courier2.id)
-        orderRepository.update(order1)
-        orderRepository.update(order2)
+        orderRepository.track(order1)
+        orderRepository.track(order2)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2)
         unitOfWork.commit()
 

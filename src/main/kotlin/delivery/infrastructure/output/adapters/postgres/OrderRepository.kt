@@ -10,21 +10,11 @@ import org.springframework.stereotype.Repository
 
 @Repository
 class OrderRepository(
-    val aggregateTracker: AggregateTracker,
-    val repository: OrderJpaRepository
+    private val aggregateTracker: AggregateTracker,
+    private val repository: OrderJpaRepository
 ) : OrderRepositoryPort {
 
-    override fun add(order: Order) {
-        require(!repository.existsById(order.id)) {
-            "Order with id ${order.id} already exists"
-        }
-        aggregateTracker.track(order)
-    }
-
-    override fun update(order: Order) {
-        require(repository.existsById(order.id)) {
-            "Cannot update non-existent order with id ${order.id}"
-        }
+    override fun track(order: Order) {
         aggregateTracker.track(order)
     }
 
@@ -36,4 +26,3 @@ class OrderRepository(
     override fun findAllAssigned(): List<Order> =
         repository.findAllByStatus(OrderStatus.ASSIGNED)
 }
-

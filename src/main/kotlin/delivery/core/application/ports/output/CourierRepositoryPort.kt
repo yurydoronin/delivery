@@ -5,8 +5,7 @@ import java.util.UUID
 
 interface CourierRepositoryPort {
 
-    fun add(courier: Courier)
-    fun update(courier: Courier)
+    fun track(courier: Courier)
     fun get(courierId: UUID): Courier?
     fun getAvailableCouriers(): List<Courier>
 }

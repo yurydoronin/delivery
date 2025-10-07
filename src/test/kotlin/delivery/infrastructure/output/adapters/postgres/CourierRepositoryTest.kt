@@ -31,7 +31,7 @@ class CourierRepositoryTest @Autowired constructor(
         val courier = Courier.of("Новый", 3, Location.of(1, 1))
 
         // Act
-        courierRepository.add(courier)
+        courierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
@@ -45,7 +45,7 @@ class CourierRepositoryTest @Autowired constructor(
     fun `update existing courier`() {
         // Arrange
         val courier = Courier.of("Обновляемый", 2, Location.of(2, 2))
-        courierRepository.add(courier)
+        courierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
@@ -53,7 +53,7 @@ class CourierRepositoryTest @Autowired constructor(
         courier.location = updatedLocation
 
         // Act
-        courierRepository.update(courier)
+        courierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
@@ -67,7 +67,7 @@ class CourierRepositoryTest @Autowired constructor(
     fun `get courier`() {
         // Arrange
         val courier = Courier.of("Иван", 3, Location.of(1, 1))
-        courierRepository.add(courier)
+        courierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
 
@@ -90,9 +90,9 @@ class CourierRepositoryTest @Autowired constructor(
         val busy = Courier.of("Занятой", 2, Location.of(3, 3))
         busy.takeOrder(order)
 
-        courierRepository.add(free1)
-        courierRepository.add(free2)
-        courierRepository.add(busy)
+        courierRepository.track(free1)
+        courierRepository.track(free2)
+        courierRepository.track(busy)
         every { aggregateTracker.getTracked() } returns listOf(free1, free2, busy)
         unitOfWork.commit()
 
