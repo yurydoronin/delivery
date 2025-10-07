@@ -5,6 +5,26 @@ spring:
   main:
     banner-mode: off
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: "jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_DATABASE:delivery}"
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:12345}
+
+  flyway:
+    baseline-version: 1
+    baseline-on-migrate: ${FLYWAY_MIGRATE:false}
+    enabled: ${FLYWAY_ENABLED:false}
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        show_sql: ${SHOW_SQL:false}
+        format_sql: false
+    open-in-view: false
+
 logging:
   level:
     root: INFO

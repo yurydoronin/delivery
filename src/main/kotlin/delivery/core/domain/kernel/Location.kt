@@ -1,6 +1,7 @@
 package delivery.core.domain.kernel
 
 import common.types.base.ValueObject
+import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
 import kotlin.math.abs
 
@@ -10,7 +11,9 @@ import kotlin.math.abs
 @ConsistentCopyVisibility
 @Embeddable
 data class Location private constructor(
+    @Column(name = "location_x", nullable = false)
     val x: Int,
+    @Column(name = "location_y", nullable = false)
     val y: Int
 ) : ValueObject {
 

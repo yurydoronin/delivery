@@ -26,7 +26,6 @@ class StoragePlace private constructor(
 
     @Column(name = "order_id")
     private var _orderId: UUID? = null
-
     val orderId: UUID?
         get() = _orderId
 
@@ -73,9 +72,6 @@ class StoragePlace private constructor(
     }
 }
 
-/**
- * Название места хранения
- */
 enum class StoragePlaceName(val displayName: String) {
     BACKPACK("рюкзак"),
     TRUNK("багажник"),
