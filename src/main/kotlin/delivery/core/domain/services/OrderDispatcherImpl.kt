@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class OrderDispatcherImpl : OrderDispatcher {
 
-    override fun dispatch(order: Order, couriers: List<Courier>): Either<DispatchError, Courier> {
+    override fun dispatch(order: Order, couriers: List<Courier>): Either<BusinessError, Courier> {
         require(order.status == OrderStatus.CREATED) { "Order must be in CREATED status" }
 
         val winner = couriers

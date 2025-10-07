@@ -21,4 +21,6 @@ class CourierRepository(
 
     override fun getAvailableCouriers(): List<Courier> = repository.findAllAvailable()
 
+    override fun getAllCouriers(): List<Courier> = repository.findAll()
+
 }

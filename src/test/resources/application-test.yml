@@ -2,3 +2,8 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+    properties:
+      hibernate.format_sql: true   # красиво форматирует SQL
+logging:
+  level:
+    org.hibernate.SQL: DEBUG        # выводит сами SQL-запросы

@@ -16,12 +16,15 @@ class UnitOfWorkImpl(
 
     @Transactional
     override fun commit() {
-        tracker.getTracked().forEach { aggregate ->
-            when (aggregate) {
-                is Courier -> courierRepository.save(aggregate)
-                is Order -> orderRepository.save(aggregate)
+        try {
+            tracker.getTracked().forEach { aggregate ->
+                when (aggregate) {
+                    is Courier -> courierRepository.save(aggregate)
+                    is Order -> orderRepository.save(aggregate)
+                }
             }
+        } finally {
+            tracker.clear()
         }
-        tracker.clear()
     }
 }
