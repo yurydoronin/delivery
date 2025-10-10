@@ -5,14 +5,14 @@ import common.types.error.BusinessError
 import delivery.core.domain.kernel.Location
 import java.util.UUID
 
-interface GetIncompleteOrdersUseCase {
-    fun getIncompleteOrders(): Either<BusinessError, List<GetIncompleteOrdersResult>>
+interface GetActiveOrdersUseCase {
+    fun getActiveOrders(): Either<BusinessError, List<GetActiveOrdersResult>>
 }
 
 /**
- * (output DTO) List of incomplete orders
+ * (output DTO) List of active orders
  */
-data class GetIncompleteOrdersResult(
+data class GetActiveOrdersResult(
     val orderId: UUID,
     val location: Location
 )

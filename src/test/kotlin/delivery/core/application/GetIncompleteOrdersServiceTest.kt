@@ -12,13 +12,13 @@ import java.util.UUID
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class GetIncompleteOrdersServiceTest @Autowired constructor(
+class GetActiveOrdersServiceTest @Autowired constructor(
     private val em: EntityManager,
-    private val sut: GetIncompleteOrdersService
+    private val sut: GetActiveOrdersService
 ) : BaseRepositoryTest() {
 
     @Test
-    fun `get incomplete orders`() {
+    fun `get active orders`() {
         // Arrange
         val courier = Courier.of("Маша", 4, Location.of(1, 1))
         em.persist(courier)
@@ -31,7 +31,7 @@ class GetIncompleteOrdersServiceTest @Autowired constructor(
         em.flush() // чтобы JdbcTemplate увидел данные
 
         // Act
-        val result = sut.getIncompleteOrders()
+        val result = sut.getActiveOrders()
 
         // Assert
         val orders = result.shouldBeRight()
@@ -41,8 +41,8 @@ class GetIncompleteOrdersServiceTest @Autowired constructor(
 
     @Test
     fun `fails when no incomplete orders`() {
-        val result = sut.getIncompleteOrders()
+        val result = sut.getActiveOrders()
 
-        result shouldBe IncompleteOrdersError.NoIncompleteOrders.left()
+        result shouldBe ActiveOrdersError.NoActiveOrders.left()
     }
 }

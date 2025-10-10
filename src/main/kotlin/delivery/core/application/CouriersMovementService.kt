@@ -14,9 +14,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class CouriersMovementService(
-    val courierRepository: CourierRepositoryPort,
-    val orderRepository: OrderRepositoryPort,
-    val unitOfWork: UnitOfWork
+    private val courierRepository: CourierRepositoryPort,
+    private val orderRepository: OrderRepositoryPort,
+    private val unitOfWork: UnitOfWork
 ) : CouriersMovementUseCase {
 
     override fun move(): Either<BusinessError, Unit> {

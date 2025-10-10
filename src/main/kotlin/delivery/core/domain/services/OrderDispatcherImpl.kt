@@ -5,7 +5,6 @@ import arrow.core.left
 import arrow.core.right
 import common.types.error.BusinessError
 import delivery.core.domain.model.courier.Courier
-import delivery.core.domain.model.courier.StorageCheck
 import delivery.core.domain.model.order.Order
 import delivery.core.domain.model.order.OrderStatus
 import org.springframework.stereotype.Service
@@ -17,7 +16,7 @@ class OrderDispatcherImpl : OrderDispatcher {
         require(order.status == OrderStatus.CREATED) { "Order must be in CREATED status" }
 
         val winner = couriers
-            .filter { it.storagePlaces.any { sp -> sp.canStore(order.volume) == StorageCheck.Ok } }
+            .filter { it.canTakeOrder(order) }
             .minByOrNull { it.calculateTimeToLocation(order.location) }
             ?: return DispatchError.NoAvailableCourier.left()
 
