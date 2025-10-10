@@ -1,0 +1,51 @@
+package delivery.core.application
+
+import arrow.core.Either
+import arrow.core.left
+import arrow.core.right
+import common.types.error.BusinessError
+import delivery.core.application.ports.input.commands.CouriersMovementUseCase
+import delivery.core.application.ports.output.CourierRepositoryPort
+import delivery.core.application.ports.output.OrderRepositoryPort
+import delivery.core.application.ports.output.UnitOfWork
+import delivery.core.domain.model.order.Order
+import java.util.UUID
+import org.springframework.stereotype.Service
+
+@Service
+class CouriersMovementService(
+    val courierRepository: CourierRepositoryPort,
+    val orderRepository: OrderRepositoryPort,
+    val unitOfWork: UnitOfWork
+) : CouriersMovementUseCase {
+
+    override fun move(): Either<BusinessError, Unit> {
+        val couriers = courierRepository.getAllCouriers()
+            .takeIf { it.isNotEmpty() } ?: return MovementError.NoCouriers.left()
+
+        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
+            .associateBy { it.courierId!! }
+            .takeIf { it.isNotEmpty() } ?: return MovementError.NoOrders.left()
+
+        couriers.forEach { courier ->
+            // берем заказ по курьеру или пропускаем курьера, у которого нет заказов
+            val order = assignedOrders[courier.id] ?: return@forEach
+            courier.move(order.location)
+
+            if (courier.location == order.location) {
+                order.complete()
+                courier.completeOrder(order)
+            }
+            courierRepository.track(courier)
+            orderRepository.track(order)
+        }
+        unitOfWork.commit()
+
+        return Unit.right()
+    }
+}
+
+sealed class MovementError(override val message: String) : BusinessError {
+    data object NoCouriers : MovementError("No couriers found")
+    data object NoOrders : MovementError("No assigned orders found")
+}

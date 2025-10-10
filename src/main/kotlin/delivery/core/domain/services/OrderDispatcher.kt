@@ -1,6 +1,7 @@
 package delivery.core.domain.services
 
 import arrow.core.Either
+import common.types.error.BusinessError
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
 
@@ -10,5 +11,5 @@ import delivery.core.domain.model.order.Order
  */
 interface OrderDispatcher {
 
-    fun dispatch(order: Order, couriers: List<Courier>): Either<DispatchError, Courier>
+    fun dispatch(order: Order, couriers: List<Courier>): Either<BusinessError, Courier>
 }
