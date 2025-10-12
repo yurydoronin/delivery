@@ -54,13 +54,16 @@ class Courier private constructor(
         _storagePlaces.add(StoragePlace.of(name, totalVolume))
     }
 
-    /**
-     * Курьер может взять заказ, если в одном из его мест хранения есть место.
-     */
     fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> =
         _storagePlaces
             .firstOrNull { it.canStore(order.volume) == StorageCheck.Ok }
             ?.right() ?: CourierError.NoAvailableStorage.left()
+
+    /**
+     * Курьер может взять заказ, если в одном из его мест хранения есть место.
+     */
+    fun canTakeOrder(order: Order): Boolean =
+        findAvailableStorage(order).isRight()
 
     fun takeOrder(order: Order): Either<BusinessError, Unit> =
         findAvailableStorage(order).flatMap { place ->

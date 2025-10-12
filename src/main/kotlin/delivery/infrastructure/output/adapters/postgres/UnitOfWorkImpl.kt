@@ -9,9 +9,9 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 class UnitOfWorkImpl(
-    val tracker: AggregateTracker,
-    val courierRepository: CourierJpaRepository,
-    val orderRepository: OrderJpaRepository
+    private val tracker: AggregateTracker,
+    private val courierRepository: CourierJpaRepository,
+    private val orderRepository: OrderJpaRepository
 ) : UnitOfWork {
 
     @Transactional

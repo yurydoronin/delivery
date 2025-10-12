@@ -14,24 +14,20 @@ class GlobalExceptionHandler {
     private val log = LoggerFactory.getLogger(GlobalExceptionHandler::class.java)
 
     @ExceptionHandler(IllegalArgumentException::class)
-    fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<ErrorResponse> {
+    fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<String> {
         log.warn("Validation error: {}", ex.message)
 
         return ResponseEntity
             .badRequest()
-            .body(ErrorResponse(ex.message ?: "Invalid input"))
+            .body(ex.message ?: "Invalid input")
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleUnexpected(ex: Exception): ResponseEntity<ErrorResponse> {
+    fun handleUnexpected(ex: Exception): ResponseEntity<String> {
         log.error("Unhandled error: {}", ex.message, ex)
 
         return ResponseEntity
             .internalServerError()
-            .body(ErrorResponse("Unexpected server error"))
+            .body("Unexpected server error")
     }
 }
-
-data class ErrorResponse(
-    val message: String
-)

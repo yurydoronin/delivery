@@ -10,8 +10,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class OrderCreationService(
-    val orderRepository: OrderRepositoryPort,
-    val unitOfWork: UnitOfWork
+    private val orderRepository: OrderRepositoryPort,
+    private val unitOfWork: UnitOfWork
 ) : OrderCreationUseCase {
 
     override fun create(command: OrderCreationCommand) {

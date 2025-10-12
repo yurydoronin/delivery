@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class OrderAssignmentService(
-    val courierRepository: CourierRepositoryPort,
-    val orderRepository: OrderRepositoryPort,
-    val orderDispatcher: OrderDispatcher,
-    val unitOfWork: UnitOfWork
+    private val courierRepository: CourierRepositoryPort,
+    private val orderRepository: OrderRepositoryPort,
+    private val orderDispatcher: OrderDispatcher,
+    private val unitOfWork: UnitOfWork
 ) : OrderAssignmentUseCase {
 
     override fun assignTo(): Either<BusinessError, Unit> {
