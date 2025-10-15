@@ -13,7 +13,7 @@ interface GetAssignedCouriersUseCase {
  * (output DTO) List of Couriers
  */
 data class GetAssignedCouriersResult(
-    val courierID: UUID,
+    val courierId: UUID,
     val name: String,
     val location: Location
 )

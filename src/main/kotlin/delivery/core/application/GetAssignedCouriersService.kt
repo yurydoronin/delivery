@@ -31,7 +31,7 @@ class GetAssignedCouriersService(
 
         val results = jdbcTemplate.query(sql) { rs, _ ->
             GetAssignedCouriersResult(
-                courierID = UUID.fromString(rs.getString("id")),
+                courierId = UUID.fromString(rs.getString("id")),
                 name = rs.getString("name"),
                 location = Location.of(
                     rs.getInt("location_x"),
