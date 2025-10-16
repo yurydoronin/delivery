@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package basketconfirmed;
+
+// Kotlin (используется java_package)
+option java_package = "queues.basketconfirmed";
+option java_multiple_files = true;
+
+message BasketConfirmedIntegrationEvent {
+  string basketId = 1;
+  Address address = 2;
+  repeated Item items = 3;
+  DeliveryPeriod deliveryPeriod = 4;
+  int32 volume = 5; // volume с маленькой буквы, идиоматичнее
+}
+
+message Address {
+  string country = 1;
+  string city = 2;
+  string street = 3;
+  string house = 4;
+  string apartment = 5;
+}
+
+message Item {
+  string id = 1;
+  string goodId = 2;
+  string title = 3;
+  double price = 4;
+  int32 quantity = 5;
+}
+
+message DeliveryPeriod {
+  int32 from = 1;
+  int32 to = 2;
+}
