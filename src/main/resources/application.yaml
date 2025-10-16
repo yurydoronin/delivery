@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: delivery
   main:
     banner-mode: off
 
@@ -29,3 +31,9 @@ logging:
   level:
     root: INFO
     org.zalando.logbook: TRACE
+
+app:
+  grpc:
+    geo-service:
+      host: ${GEO_SERVICE_GRPC_HOST:0.0.0.0}
+      port: ${GEO_SERVICE_GRPC_PORT:5004}
