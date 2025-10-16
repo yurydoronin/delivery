@@ -15,7 +15,7 @@ class GetAssignedCouriersController(
     private val useCase: GetAssignedCouriersUseCase
 ) {
     @GetMapping
-    fun getAllAssigned(): ResponseEntity<List<GetAssignedCouriersResponse>> =
+    fun get(): ResponseEntity<List<GetAssignedCouriersResponse>> =
         useCase.getAllAssigned()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
@@ -31,7 +31,7 @@ fun List<GetAssignedCouriersResult>.toResponse(): List<GetAssignedCouriersRespon
 
 fun GetAssignedCouriersResult.toResponse() =
     GetAssignedCouriersResponse(
-        id = courierID,
+        id = courierId,
         name = name,
         location = CourierLocationResponse(
             x = location.x,

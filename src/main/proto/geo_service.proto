@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package geo;
+
+// Kotlin (используется java_package)
+option java_package = "clients.geo";
+option java_multiple_files = true;
+
+// The Geo service definition.
+service Geo {
+  // Get Geolocation
+  rpc GetGeolocation (GetGeolocationRequest) returns (GetGeolocationReply);
+}
+
+// Request
+message GetGeolocationRequest {
+  string street = 1;
+}
+
+// Response
+message GetGeolocationReply {
+  Location location = 1;
+}
+
+// Geolocation
+message Location {
+  int32 x = 1;
+  int32 y = 2;
+}
+
+message ErrorResponse {
+  string text = 1;
+}

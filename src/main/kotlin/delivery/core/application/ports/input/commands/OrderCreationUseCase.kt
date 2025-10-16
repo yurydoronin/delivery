@@ -1,16 +1,18 @@
 package delivery.core.application.ports.input.commands
 
+import arrow.core.Either
+import delivery.infrastructure.output.adapters.grpc.GeoServiceClientError
 import java.util.UUID
 
 interface OrderCreationUseCase {
-    fun create(command: OrderCreationCommand)
+    fun create(command: OrderCreationCommand): Either<GeoServiceClientError, Unit>
 }
 
 /**
  * (input DTO) Command to create an Order
  */
 data class OrderCreationCommand(
-    val orderID: UUID,
+    val orderId: UUID,
     val street: String,
     val volume: Int,
 )

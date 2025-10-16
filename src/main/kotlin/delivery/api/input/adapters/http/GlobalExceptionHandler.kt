@@ -28,6 +28,6 @@ class GlobalExceptionHandler {
 
         return ResponseEntity
             .internalServerError()
-            .body("Unexpected server error")
+            .body("Unexpected server error: ${ex.cause}")
     }
 }

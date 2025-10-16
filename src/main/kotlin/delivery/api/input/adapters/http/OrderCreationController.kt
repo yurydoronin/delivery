@@ -17,22 +17,28 @@ class OrderCreationController(
 ) {
     @PostMapping
     fun create(@RequestBody request: OrderCreationRequest): ResponseEntity<String> =
-        useCase.create(request.toCommand())
-            .let { ResponseEntity.status(HttpStatus.CREATED).build() }
+        useCase.create(request.toCommand()).fold(
+            ifLeft = { error ->
+                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.message)
+            },
+            ifRight = {
+                ResponseEntity.status(HttpStatus.CREATED).build()
+            }
+        )
 }
 
 /**
  * (DTO) HTTP-Request to create an order
  */
 data class OrderCreationRequest(
-    val orderID: UUID,
+    val orderId: UUID,
     val street: String,
     val volume: Int,
 )
 
 fun OrderCreationRequest.toCommand(): OrderCreationCommand =
     OrderCreationCommand(
-        orderID = orderID,
+        orderId = orderId,
         street = street,
         volume = volume,
     )
