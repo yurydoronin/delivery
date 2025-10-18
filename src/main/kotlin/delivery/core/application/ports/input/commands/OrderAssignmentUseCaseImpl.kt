@@ -1,7 +1,7 @@
 package delivery.core.application.ports.input.commands
 
 import arrow.core.Either
-import arrow.core.left
+import arrow.core.raise.either
 import common.types.error.BusinessError
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
@@ -17,18 +17,16 @@ class OrderAssignmentUseCaseImpl(
     private val unitOfWork: UnitOfWork
 ) : OrderAssignmentUseCase {
 
-    override fun execute(): Either<BusinessError, Unit> {
+    override fun execute(): Either<BusinessError, Unit> = either {
         val order = orderRepository.findAnyCreated()
-            ?: return OrderAssignmentError.OrderNotFound.left()
+            ?: raise(OrderAssignmentError.OrderNotFound)
 
         val couriers = courierRepository.getAvailableCouriers()
+        val courier = orderDispatcher.dispatch(order, couriers).bind()
 
-        return orderDispatcher.dispatch(order, couriers)
-            .map { courier ->
-                orderRepository.track(order)
-                courierRepository.track(courier)
-                unitOfWork.commit()
-            }
+        orderRepository.track(order)
+        courierRepository.track(courier)
+        unitOfWork.commit()
     }
 }
 

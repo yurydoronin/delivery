@@ -1,8 +1,7 @@
 package delivery.core.application.ports.input.queries
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import common.types.error.BusinessError
 import delivery.core.domain.kernel.Location
 import java.util.UUID
@@ -16,7 +15,7 @@ class GetAssignedCouriersUseCaseImpl(
 ) : GetAssignedCouriersUseCase {
 
     @Transactional(readOnly = true)
-    override fun execute(): Either<BusinessError, List<GetAssignedCouriersResult>> {
+    override fun execute(): Either<BusinessError, List<GetAssignedCouriersResult>> = either {
         val sql = """
             SELECT c.id, c.name, c.location_x, c.location_y
             FROM couriers c
@@ -25,7 +24,7 @@ class GetAssignedCouriersUseCaseImpl(
                 WHERE o.courier_id = c.id
                   AND o.status = 'ASSIGNED'
             )
-        """
+        """.trimIndent()
 
         val results = jdbcTemplate.query(sql) { rs, _ ->
             GetAssignedCouriersResult(
@@ -38,9 +37,9 @@ class GetAssignedCouriersUseCaseImpl(
             )
         }
 
-        return results.takeIf { it.isNotEmpty() }
-            ?.right()
-            ?: AssignedCouriersError.NoAssignedCouriers.left()
+        if (results.isEmpty()) raise(AssignedCouriersError.NoAssignedCouriers)
+
+        results
     }
 }
 
