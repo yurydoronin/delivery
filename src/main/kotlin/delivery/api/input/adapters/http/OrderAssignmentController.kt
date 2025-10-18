@@ -14,7 +14,7 @@ class OrderAssignmentController(
 ) {
     @PostMapping
     fun assign(): ResponseEntity<String> =
-        useCase.assignTo()
+        useCase.execute()
             .fold(
                 ifLeft = { error -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(error.message) },
                 ifRight = { ResponseEntity.ok().build() }

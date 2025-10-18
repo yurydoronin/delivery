@@ -10,6 +10,6 @@ class AssignOrdersJob(
     private val useCase: OrderAssignmentUseCase
 ) : Job {
     override fun execute(context: JobExecutionContext) {
-        useCase.assignTo()
+        useCase.execute()
     }
 }

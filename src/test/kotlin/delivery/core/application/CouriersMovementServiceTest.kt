@@ -1,6 +1,8 @@
 package delivery.core.application
 
 import arrow.core.left
+import delivery.core.application.ports.input.commands.CouriersMovementUseCaseImpl
+import delivery.core.application.ports.input.commands.MovementError
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -22,7 +24,7 @@ class CouriersMovementServiceTest {
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
 
-    val sut = CouriersMovementService(
+    val sut = CouriersMovementUseCaseImpl(
         courierRepository,
         orderRepository,
         unitOfWork
@@ -35,7 +37,7 @@ class CouriersMovementServiceTest {
         every { orderRepository.findAllAssigned() } returns listOf()
 
         // Act
-        val result = sut.move()
+        val result = sut.execute()
 
         // Assert
         result shouldBe MovementError.NoCouriers.left()
@@ -50,7 +52,7 @@ class CouriersMovementServiceTest {
         every { orderRepository.findAllAssigned() } returns emptyList()
 
         // Act
-        val result = sut.move()
+        val result = sut.execute()
 
         // Assert
         result shouldBe MovementError.NoOrders.left()
@@ -68,7 +70,7 @@ class CouriersMovementServiceTest {
         every { orderRepository.findAllAssigned() } returns listOf(order1)
 
         // Act
-        val result = sut.move()
+        val result = sut.execute()
 
         // Assert
         result.shouldBeRight()

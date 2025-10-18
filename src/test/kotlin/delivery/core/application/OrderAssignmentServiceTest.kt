@@ -2,6 +2,8 @@ package delivery.core.application
 
 import arrow.core.left
 import arrow.core.right
+import delivery.core.application.ports.input.commands.OrderAssignmentError
+import delivery.core.application.ports.input.commands.OrderAssignmentUseCaseImpl
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -25,7 +27,7 @@ class OrderAssignmentServiceTest {
     val orderDispatcher: OrderDispatcher = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
 
-    val sut = OrderAssignmentService(
+    val sut = OrderAssignmentUseCaseImpl(
         courierRepository,
         orderRepository,
         orderDispatcher,
@@ -45,7 +47,7 @@ class OrderAssignmentServiceTest {
         every { orderDispatcher.dispatch(order, couriers) } returns courier1.right()
 
         // Act
-        val result = sut.assignTo()
+        val result = sut.execute()
 
         // Assert
         result.shouldBeRight()
@@ -58,7 +60,7 @@ class OrderAssignmentServiceTest {
         every { orderRepository.findAnyCreated() } returns null
 
         // Act
-        val result = sut.assignTo()
+        val result = sut.execute()
 
         // Assert
         result shouldBe OrderAssignmentError.OrderNotFound.left()
@@ -75,7 +77,7 @@ class OrderAssignmentServiceTest {
         every { orderDispatcher.dispatch(order, couriers) } returns DispatchError.NoAvailableCourier.left()
 
         // Act
-        val result = sut.assignTo()
+        val result = sut.execute()
 
         // Assert
         result shouldBe DispatchError.NoAvailableCourier.left()

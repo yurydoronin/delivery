@@ -6,7 +6,7 @@ import delivery.core.domain.kernel.Location
 import java.util.UUID
 
 interface GetAssignedCouriersUseCase {
-    fun getAllAssigned(): Either<BusinessError, List<GetAssignedCouriersResult>>
+    fun execute(): Either<BusinessError, List<GetAssignedCouriersResult>>
 }
 
 /**

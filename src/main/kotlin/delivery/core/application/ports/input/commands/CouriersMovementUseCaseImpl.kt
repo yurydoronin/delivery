@@ -1,10 +1,9 @@
-package delivery.core.application
+package delivery.core.application.ports.input.commands
 
 import arrow.core.Either
 import arrow.core.left
 import arrow.core.right
 import common.types.error.BusinessError
-import delivery.core.application.ports.input.commands.CouriersMovementUseCase
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -13,13 +12,13 @@ import java.util.UUID
 import org.springframework.stereotype.Service
 
 @Service
-class CouriersMovementService(
+class CouriersMovementUseCaseImpl(
     private val courierRepository: CourierRepositoryPort,
     private val orderRepository: OrderRepositoryPort,
     private val unitOfWork: UnitOfWork
 ) : CouriersMovementUseCase {
 
-    override fun move(): Either<BusinessError, Unit> {
+    override fun execute(): Either<BusinessError, Unit> {
         val couriers = courierRepository.getAllCouriers()
             .takeIf { it.isNotEmpty() } ?: return MovementError.NoCouriers.left()
 

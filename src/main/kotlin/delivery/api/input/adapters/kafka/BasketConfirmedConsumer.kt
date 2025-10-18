@@ -24,7 +24,7 @@ class BasketConfirmedConsumer(
 
             log.info("Received basketId=${event.basketId} with volume=${event.volume}")
 
-            useCase.create(
+            useCase.execute(
                 OrderCreationCommand(
                     orderId = UUID.fromString(event.basketId),
                     street = event.address.street,
