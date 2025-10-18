@@ -16,7 +16,7 @@ class GetAssignedCouriersController(
 ) {
     @GetMapping
     fun get(): ResponseEntity<List<GetAssignedCouriersResponse>> =
-        useCase.getAllAssigned()
+        useCase.execute()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
                 ifRight = { ResponseEntity.ok(it.toResponse()) }

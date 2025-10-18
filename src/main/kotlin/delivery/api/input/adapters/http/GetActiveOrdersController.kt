@@ -16,7 +16,7 @@ class GetActiveOrdersController(
 ) {
     @GetMapping
     fun get(): ResponseEntity<List<ActiveOrdersResponse>> =
-        useCase.getActiveOrders()
+        useCase.execute()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
                 ifRight = { results -> ResponseEntity.ok(results.toResponse()) }

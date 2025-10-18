@@ -1,6 +1,8 @@
 package delivery.core.application
 
 import arrow.core.left
+import delivery.core.application.ports.input.queries.AssignedCouriersError
+import delivery.core.application.ports.input.queries.GetAssignedCouriersUseCaseImpl
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
@@ -14,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class GetAssignedCouriersServiceTest @Autowired constructor(
     private val em: EntityManager,
-    private val sut: GetAssignedCouriersService
+    private val sut: GetAssignedCouriersUseCaseImpl
 ) : BaseRepositoryTest() {
 
     @Test
@@ -31,7 +33,7 @@ class GetAssignedCouriersServiceTest @Autowired constructor(
         em.flush()
 
         // Act
-        val result = sut.getAllAssigned()
+        val result = sut.execute()
 
         // Assert
         val couriers = result.shouldBeRight()
@@ -42,7 +44,7 @@ class GetAssignedCouriersServiceTest @Autowired constructor(
 
     @Test
     fun `fails when no assigned couriers`() {
-        val result = sut.getAllAssigned()
+        val result = sut.execute()
 
         result shouldBe AssignedCouriersError.NoAssignedCouriers.left()
     }

@@ -3,6 +3,7 @@ package delivery.core.application
 import arrow.core.left
 import arrow.core.right
 import delivery.core.application.ports.input.commands.OrderCreationCommand
+import delivery.core.application.ports.input.commands.OrderCreationUseCaseImpl
 import delivery.core.application.ports.output.GeoServiceClientPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -21,7 +22,7 @@ class OrderCreationServiceTest {
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val geoServiceClient: GeoServiceClientPort = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
-    val sut = OrderCreationService(orderRepository, geoServiceClient, unitOfWork)
+    val sut = OrderCreationUseCaseImpl(orderRepository, geoServiceClient, unitOfWork)
 
     @Test
     fun `create order`() {
@@ -35,7 +36,7 @@ class OrderCreationServiceTest {
         every { geoServiceClient.getLocation(command.street) } returns Location.of(1, 1).right()
 
         // Act
-        val result = sut.create(command)
+        val result = sut.execute(command)
 
         // Assert
         result.shouldBeRight()
@@ -55,7 +56,7 @@ class OrderCreationServiceTest {
         every { geoServiceClient.getLocation(command.street) } returns GeoServiceClientError.LocationNotFound.left()
 
         // Act
-        val result = sut.create(command)
+        val result = sut.execute(command)
 
         // Assert
         result shouldBe GeoServiceClientError.LocationNotFound.left()

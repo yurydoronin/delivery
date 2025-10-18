@@ -2,9 +2,7 @@ package delivery.api.input.adapters.http
 
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
-import delivery.core.application.MovementError
-import delivery.core.application.OrderAssignmentError
-import delivery.core.application.ports.input.commands.CouriersMovementUseCase
+import delivery.core.application.ports.input.commands.OrderAssignmentError
 import delivery.core.application.ports.input.commands.OrderAssignmentUseCase
 import delivery.core.domain.services.DispatchError
 import io.mockk.every
@@ -26,33 +24,33 @@ class OrderAssignmentControllerContractTest @Autowired constructor(
 
     @Test
     fun `assign order`() {
-        every { useCase.assignTo() } returns Either.Right(Unit)
+        every { useCase.execute() } returns Either.Right(Unit)
 
         mockMvc.perform(post("/api/v1/orders/assign"))
             .andExpect(status().isOk)
 
-        verify { useCase.assignTo() }
+        verify { useCase.execute() }
     }
 
     @Test
     fun `fails to assign order when no orders found`() {
-        every { useCase.assignTo() } returns Either.Left(OrderAssignmentError.OrderNotFound)
+        every { useCase.execute() } returns Either.Left(OrderAssignmentError.OrderNotFound)
 
         mockMvc.perform(post("/api/v1/orders/assign"))
             .andExpect(status().isNotFound)
             .andExpect { content().string("Any new order not found") }
 
-        verify { useCase.assignTo() }
+        verify { useCase.execute() }
     }
 
     @Test
     fun `fails to assign order when no couriers found`() {
-        every { useCase.assignTo() } returns Either.Left(DispatchError.NoAvailableCourier)
+        every { useCase.execute() } returns Either.Left(DispatchError.NoAvailableCourier)
 
         mockMvc.perform(post("/api/v1/orders/assign"))
             .andExpect(status().isNotFound)
             .andExpect { content().string("No available courier can take this order") }
 
-        verify { useCase.assignTo() }
+        verify { useCase.execute() }
     }
 }

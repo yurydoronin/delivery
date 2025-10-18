@@ -1,6 +1,8 @@
 package delivery.core.application
 
 import arrow.core.left
+import delivery.core.application.ports.input.queries.ActiveOrdersError
+import delivery.core.application.ports.input.queries.GetActiveOrdersUseCaseImpl
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
@@ -14,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class GetActiveOrdersServiceTest @Autowired constructor(
     private val em: EntityManager,
-    private val sut: GetActiveOrdersService
+    private val sut: GetActiveOrdersUseCaseImpl
 ) : BaseRepositoryTest() {
 
     @Test
@@ -31,7 +33,7 @@ class GetActiveOrdersServiceTest @Autowired constructor(
         em.flush() // чтобы JdbcTemplate увидел данные
 
         // Act
-        val result = sut.getActiveOrders()
+        val result = sut.execute()
 
         // Assert
         val orders = result.shouldBeRight()
@@ -41,7 +43,7 @@ class GetActiveOrdersServiceTest @Autowired constructor(
 
     @Test
     fun `fails when no incomplete orders`() {
-        val result = sut.getActiveOrders()
+        val result = sut.execute()
 
         result shouldBe ActiveOrdersError.NoActiveOrders.left()
     }

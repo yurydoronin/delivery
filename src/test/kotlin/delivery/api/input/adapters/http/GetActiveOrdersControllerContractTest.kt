@@ -3,7 +3,7 @@ package delivery.api.input.adapters.http
 import arrow.core.Either
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import delivery.core.application.ActiveOrdersError
+import delivery.core.application.ports.input.queries.ActiveOrdersError
 import delivery.core.application.ports.input.queries.GetActiveOrdersResult
 import delivery.core.application.ports.input.queries.GetActiveOrdersUseCase
 import delivery.core.domain.kernel.Location
@@ -31,7 +31,7 @@ class GetActiveOrdersControllerContractTest @Autowired constructor(
         // Arrange
         val result = GetActiveOrdersResult(UUID.randomUUID(), Location.of(1, 1))
 
-        every { useCase.getActiveOrders() } returns Either.Right(listOf(result))
+        every { useCase.execute() } returns Either.Right(listOf(result))
 
         val expectedJson = objectMapper.writeValueAsString(
             listOf(
@@ -50,7 +50,7 @@ class GetActiveOrdersControllerContractTest @Autowired constructor(
 
     @Test
     fun `fails to get orders`() {
-        every { useCase.getActiveOrders() } returns Either.Left(ActiveOrdersError.NoActiveOrders)
+        every { useCase.execute() } returns Either.Left(ActiveOrdersError.NoActiveOrders)
 
         mockMvc.perform(
             get("/api/v1/orders/active")

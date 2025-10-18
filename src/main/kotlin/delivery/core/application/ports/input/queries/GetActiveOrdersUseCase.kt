@@ -6,7 +6,7 @@ import delivery.core.domain.kernel.Location
 import java.util.UUID
 
 interface GetActiveOrdersUseCase {
-    fun getActiveOrders(): Either<BusinessError, List<GetActiveOrdersResult>>
+    fun execute(): Either<BusinessError, List<GetActiveOrdersResult>>
 }
 
 /**

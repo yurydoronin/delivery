@@ -32,7 +32,7 @@ class OrderCreationControllerContractTest @Autowired constructor(
         val orderId = UUID.randomUUID()
         val request = OrderCreationRequest(orderId, "Main street", 5)
 
-        every { useCase.create(request.toCommand()) } returns Either.Right(Unit)
+        every { useCase.execute(request.toCommand()) } returns Either.Right(Unit)
 
         // Act & Assert
         mockMvc.perform(
@@ -42,7 +42,7 @@ class OrderCreationControllerContractTest @Autowired constructor(
         )
             .andExpect(status().isCreated)
 
-        verify { useCase.create(OrderCreationCommand(orderId, "Main street", 5)) }
+        verify { useCase.execute(OrderCreationCommand(orderId, "Main street", 5)) }
     }
 
     @Test
@@ -50,7 +50,7 @@ class OrderCreationControllerContractTest @Autowired constructor(
         // Arrange
         val request = OrderCreationRequest(UUID.randomUUID(), "Main street", 5)
 
-        every { useCase.create(request.toCommand()) } returns Either.Left(GeoServiceClientError.LocationNotFound)
+        every { useCase.execute(request.toCommand()) } returns Either.Left(GeoServiceClientError.LocationNotFound)
 
         // Act & Assert
         mockMvc.perform(
@@ -61,6 +61,6 @@ class OrderCreationControllerContractTest @Autowired constructor(
             .andExpect(status().isBadRequest)
             .andExpect { content().string("Location not found") }
 
-        verify { useCase.create(request.toCommand()) }
+        verify { useCase.execute(request.toCommand()) }
     }
 }

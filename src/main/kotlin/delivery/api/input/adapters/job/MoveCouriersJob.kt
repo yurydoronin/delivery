@@ -10,6 +10,6 @@ class MoveCouriersJob(
     private val useCase: CouriersMovementUseCase
 ) : Job {
     override fun execute(context: JobExecutionContext) {
-        useCase.move()
+        useCase.execute()
     }
 }
