@@ -2,13 +2,9 @@ package delivery.infrastructure.output.adapters.postgres
 
 import common.types.base.AggregateRoot
 import delivery.core.application.ports.output.AggregateTracker
-import org.springframework.context.annotation.Scope
-import org.springframework.context.annotation.ScopedProxyMode
 import org.springframework.stereotype.Component
-import org.springframework.web.context.WebApplicationContext
 
 @Component
-@Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.TARGET_CLASS)
 class AggregateTrackerImpl : AggregateTracker {
 
     private val tracked = mutableSetOf<AggregateRoot>()
