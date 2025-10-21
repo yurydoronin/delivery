@@ -9,7 +9,12 @@ import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @ActiveProfiles("test")
-@SpringBootTest
+@SpringBootTest(
+    properties = [
+        "spring.kafka.listener.auto-startup=false",
+        "spring.kafka.bootstrap-servers=localhost:0"
+    ]
+)
 @Testcontainers
 @Transactional
 abstract class BaseRepositoryTest {

@@ -21,7 +21,7 @@ class OrderRepository(
     override fun get(orderId: UUID): Order? = repository.findByIdOrNull(orderId)
 
     override fun findAnyCreated(): Order? =
-        repository.findFirstByStatus(OrderStatus.CREATED)
+        repository.findFirstBy_status(OrderStatus.CREATED)
 
     override fun findAllAssigned(): List<Order> =
         repository.findAllByStatus(OrderStatus.ASSIGNED)

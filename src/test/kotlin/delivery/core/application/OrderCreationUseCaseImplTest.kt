@@ -17,7 +17,7 @@ import io.mockk.verify
 import java.util.UUID
 import org.junit.jupiter.api.Test
 
-class OrderCreationServiceTest {
+class OrderCreationUseCaseImplTest {
 
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val geoServiceClient: GeoServiceClientPort = mockk(relaxed = true)

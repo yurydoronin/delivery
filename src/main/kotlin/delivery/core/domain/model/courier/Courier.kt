@@ -3,6 +3,7 @@ package delivery.core.domain.model.courier
 import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.left
+import arrow.core.raise.either
 import arrow.core.right
 import common.types.base.Aggregate
 import common.types.error.BusinessError
@@ -40,14 +41,16 @@ class Courier private constructor(
         // Каждый курьер владеет местом хранения "Сумка" объемом 10 литров
         private const val VOLUME = 10
 
-        fun of(name: String, speed: Int, location: Location): Courier {
-            require(name.isNotBlank()) { "Name must not be blank" }
-            require(speed > 0) { "Speed must be positive" }
+        fun of(name: String, speed: Int, location: Location, storageName: String = "Сумка"): Either<StorageError, Courier> =
+            either {
+                require(name.isNotBlank()) { "Name must not be blank" }
+                require(speed > 0) { "Speed must be positive" }
 
-            val courier = Courier(name, speed, location)
-            courier.addStoragePlace(StoragePlaceName.BACKPACK, VOLUME)
-            return courier
-        }
+                val courier = Courier(name, speed, location)
+                val storagePlace = StoragePlaceName.fromName(storageName).bind()
+                courier.addStoragePlace(storagePlace, VOLUME)
+                courier
+            }
     }
 
     fun addStoragePlace(name: StoragePlaceName, totalVolume: Int) {

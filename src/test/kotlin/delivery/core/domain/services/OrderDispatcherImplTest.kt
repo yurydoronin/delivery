@@ -1,5 +1,6 @@
 package delivery.core.domain.services
 
+import arrow.core.raise.either
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.courier.StoragePlaceName
@@ -15,57 +16,63 @@ class OrderDispatcherTest {
 
     @Test
     fun `assigns order to fastest available courier`() {
-        // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 5)
-        val courier1 = Courier.of("Alice", 1, Location.of(1, 1)) // медленный
-        val courier2 = Courier.of("Bob", 2, Location.of(1, 1))   // быстрый
-        val courier3 = Courier.of("Mike", 2, Location.of(10, 10)) // далеко
+        either {
+            // Arrange
+            val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 5)
+            val courier1 = Courier.of("Alice", 1, Location.of(1, 1)).bind() // медленный
+            val courier2 = Courier.of("Bob", 2, Location.of(1, 1)).bind()   // быстрый
+            val courier3 = Courier.of("Mike", 2, Location.of(10, 10)).bind() // далеко
 
-        // Act
-        val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
+            // Act
+            val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
 
-        // Assert
-        val winner = result.shouldBeRight()
-        winner.id shouldBe courier2.id
-        winner.name shouldBe "Bob"
-        winner.id shouldBe order.courierId
-        OrderStatus.ASSIGNED shouldBe order.status
+            // Assert
+            val winner = result.shouldBeRight()
+            winner.id shouldBe courier2.id
+            winner.name shouldBe "Bob"
+            winner.id shouldBe order.courierId
+            OrderStatus.ASSIGNED shouldBe order.status
+        }
     }
 
     @Test
     fun `chooses courier with available storage when faster couriers are full`() {
-        // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 15) // слишком большой
-        val courier1 = Courier.of("Alice", 1, Location.of(1, 1)) // медленный
-        val courier2 = Courier.of("Bob", 2, Location.of(1, 1)) // быстрейший, но нет места
-        val courier3 = Courier.of("Mike", 2, Location.of(10, 10)) // далеко, но есть доп место (в багажнике)
-        courier3.addStoragePlace(StoragePlaceName.TRUNK, 20)
+        either {
+            // Arrange
+            val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 15) // слишком большой
+            val courier1 = Courier.of("Alice", 1, Location.of(1, 1)).bind() // медленный
+            val courier2 = Courier.of("Bob", 2, Location.of(1, 1)).bind() // быстрейший, но нет места
+            val courier3 = Courier.of("Mike", 2, Location.of(10, 10)).bind() // далеко, но есть доп место (в багажнике)
+            courier3.addStoragePlace(StoragePlaceName.BICYCLE_TRUNK, 20)
 
-        // Act
-        val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
+            // Act
+            val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
 
-        // Assert
-        val winner = result.shouldBeRight()
-        winner.id shouldBe courier3.id
-        winner.name shouldBe "Mike"
-        winner.id shouldBe order.courierId
-        OrderStatus.ASSIGNED shouldBe order.status
+            // Assert
+            val winner = result.shouldBeRight()
+            winner.id shouldBe courier3.id
+            winner.name shouldBe "Mike"
+            winner.id shouldBe order.courierId
+            OrderStatus.ASSIGNED shouldBe order.status
+        }
     }
 
     @Test
     fun `fails to dispatch if no available courier`() {
-        // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 15)
-        val courier1 = Courier.of("Alice", 1, Location.of(1, 1))
-        val courier2 = Courier.of("Bob", 2, Location.of(1, 1))
-        val courier3 = Courier.of("Mike", 2, Location.of(10, 10))
+        either {
+            // Arrange
+            val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 15)
+            val courier1 = Courier.of("Alice", 1, Location.of(1, 1)).bind()
+            val courier2 = Courier.of("Bob", 2, Location.of(1, 1)).bind()
+            val courier3 = Courier.of("Mike", 2, Location.of(10, 10)).bind()
 
-        // Act
-        val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
+            // Act
+            val result = OrderDispatcherImpl().dispatch(order, listOf(courier1, courier2, courier3))
 
-        // Assert
-        val error = result.shouldBeLeft()
-        error shouldBe DispatchError.NoAvailableCourier
-        error.message shouldBe "No available courier can take this order"
+            // Assert
+            val error = result.shouldBeLeft()
+            error shouldBe DispatchError.NoAvailableCourier
+            error.message shouldBe "No available courier can take this order"
+        }
     }
 }

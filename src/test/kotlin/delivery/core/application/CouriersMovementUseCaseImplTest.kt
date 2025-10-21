@@ -1,6 +1,7 @@
 package delivery.core.application
 
 import arrow.core.left
+import arrow.core.raise.either
 import delivery.core.application.ports.input.commands.CouriersMovementUseCaseImpl
 import delivery.core.application.ports.input.commands.MovementError
 import delivery.core.application.ports.output.CourierRepositoryPort
@@ -18,7 +19,7 @@ import io.mockk.verify
 import java.util.UUID
 import org.junit.jupiter.api.Test
 
-class CouriersMovementServiceTest {
+class CouriersMovementUseCaseImplTest {
 
     val courierRepository: CourierRepositoryPort = mockk(relaxed = true)
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
@@ -45,40 +46,43 @@ class CouriersMovementServiceTest {
 
     @Test
     fun `fails to move if no assigned orders`() {
-        // Arrange
-        val courier = Courier.of("Маша", 1, Location.of(1, 1))
+        either {
+            // Arrange
+            val courier = Courier.of("Маша", 1, Location.of(1, 1)).bind()
+            every { courierRepository.getAllCouriers() } returns listOf(courier)
+            every { orderRepository.findAllAssigned() } returns emptyList()
 
-        every { courierRepository.getAllCouriers() } returns listOf(courier)
-        every { orderRepository.findAllAssigned() } returns emptyList()
+            // Act
+            val result = sut.execute().bind()
 
-        // Act
-        val result = sut.execute()
-
-        // Assert
-        result shouldBe MovementError.NoOrders.left()
+            // Assert
+            result shouldBe MovementError.NoOrders.left()
+        }
     }
 
     @Test
     fun `move couriers`() {
-        // Arrange
-        val courier1 = Courier.of("Маша", 4, Location.of(1, 1))
-        val courier2 = Courier.of("Коля", 1, Location.of(2, 2))
-        val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
-        order1.assignToCourier(courier1.id)
+        either {
+            // Arrange
+            val courier1 = Courier.of("Маша", 4, Location.of(1, 1)).bind()
+            val courier2 = Courier.of("Коля", 1, Location.of(2, 2)).bind()
+            val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
+            order1.assignToCourier(courier1.id)
 
-        every { courierRepository.getAllCouriers() } returns listOf(courier1, courier2)
-        every { orderRepository.findAllAssigned() } returns listOf(order1)
+            every { courierRepository.getAllCouriers() } returns listOf(courier1, courier2)
+            every { orderRepository.findAllAssigned() } returns listOf(order1)
 
-        // Act
-        val result = sut.execute()
+            // Act
+            val result = sut.execute()
 
-        // Assert
-        result.shouldBeRight()
-        // courier1 достиг заказа
-        courier1.location shouldBe order1.location
-        order1.status shouldBe OrderStatus.COMPLETED
-        // courier2 остался на месте, так как заказа для него нет
-        courier2.location shouldBe Location.of(2, 2)
-        verify { unitOfWork.commit() }
+            // Assert
+            result.shouldBeRight()
+            // courier1 достиг заказа
+            courier1.location shouldBe order1.location
+            order1.status shouldBe OrderStatus.COMPLETED
+            // courier2 остался на месте, так как заказа для него нет
+            courier2.location shouldBe Location.of(2, 2)
+            verify { unitOfWork.commit() }
+        }
     }
 }

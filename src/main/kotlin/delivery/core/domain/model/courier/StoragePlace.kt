@@ -1,8 +1,7 @@
 package delivery.core.domain.model.courier
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import common.types.base.DomainEntity
 import common.types.error.BusinessError
 import jakarta.persistence.*
@@ -52,15 +51,13 @@ class StoragePlace private constructor(
         else -> StorageCheck.Ok
     }
 
-    fun store(orderId: UUID, orderVolume: Int): Either<StorageError, Unit> =
+    fun store(orderId: UUID, orderVolume: Int): Either<StorageError, Unit> = either {
         when (canStore(orderVolume)) {
-            is StorageCheck.Ok -> {
-                _orderId = orderId
-                Unit.right()
-            }
-            is StorageCheck.Occupied -> StorageError.Occupied.left()
-            is StorageCheck.NotEnoughSpace -> StorageError.NotEnoughSpace.left()
+            is StorageCheck.Ok -> _orderId = orderId
+            is StorageCheck.Occupied -> raise(StorageError.Occupied)
+            is StorageCheck.NotEnoughSpace -> raise(StorageError.NotEnoughSpace)
         }
+    }
 
     /**
      * Извлечение заказа из места хранения
@@ -73,8 +70,19 @@ class StoragePlace private constructor(
 }
 
 enum class StoragePlaceName(val displayName: String) {
-    BACKPACK("рюкзак"),
-    TRUNK("багажник"),
+    BACKPACK("Сумка"),
+    BICYCLE_BACKPACK("Вело-Сумка"),
+    BICYCLE_TRUNK("Вело-Багажник"),
+    CAR_BACKPACK("Авто-Сумка"),
+    CAR_TRUNK("Авто-Багажник"),
+    CAR_TRAILER("Авто-Прицеп");
+
+    companion object {
+        fun fromName(name: String): Either<StorageError, StoragePlaceName> = either {
+            entries.firstOrNull { it.displayName.equals(name, ignoreCase = true) }
+                ?: raise(StorageError.UnknownStoragePlace(name))
+        }
+    }
 }
 
 sealed class StorageCheck {
@@ -86,4 +94,5 @@ sealed class StorageCheck {
 sealed class StorageError(override val message: String) : BusinessError {
     data object Occupied : StorageError("Storage is already occupied")
     data object NotEnoughSpace : StorageError("Order volume exceeds storage capacity")
+    data class UnknownStoragePlace(val name: String) : StorageError("Unknown storage place: $name")
 }

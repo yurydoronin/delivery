@@ -20,7 +20,7 @@ class StoragePlaceTest {
     @Test
     fun `fails if total volume is not positive`() {
         val exception = assertFailsWith<IllegalArgumentException> {
-            StoragePlace.of(StoragePlaceName.TRUNK, 0)
+            StoragePlace.of(StoragePlaceName.BICYCLE_TRUNK, 0)
         }
 
         assertTrue(exception.message!!.contains("Total volume must be greater than 0"))
@@ -35,7 +35,7 @@ class StoragePlaceTest {
 
     @Test
     fun `cannot store order if occupied`() {
-        val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
+        val sp = StoragePlace.of(StoragePlaceName.BICYCLE_TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5)
 
@@ -56,7 +56,7 @@ class StoragePlaceTest {
 
     @Test
     fun `cannot store another order if already occupied`() {
-        val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
+        val sp = StoragePlace.of(StoragePlaceName.BICYCLE_TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 8)
 
@@ -97,7 +97,7 @@ class StoragePlaceTest {
 
     @Test
     fun `clears order and frees storage`() {
-        val sp = StoragePlace.of(StoragePlaceName.TRUNK, 10)
+        val sp = StoragePlace.of(StoragePlaceName.BICYCLE_TRUNK, 10)
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5)
 
