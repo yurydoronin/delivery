@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8082
 
 spring:
   application:
@@ -36,7 +36,7 @@ spring:
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 logging:
   level:
@@ -50,3 +50,4 @@ app:
       port: ${GEO_SERVICE_GRPC_PORT:5004}
   kafka:
     basket-confirmed-topic: ${KAFKA_BASKET_CONFIRMED_TOPIC:basket.confirmed}
+    order-status-changed-topic: ${KAFKA_ORDER_STATUS_CHANGED_TOPIC:order.status.changed}

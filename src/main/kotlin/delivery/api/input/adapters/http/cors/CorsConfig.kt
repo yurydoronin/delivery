@@ -14,7 +14,7 @@ class CorsConfig {
         UrlBasedCorsConfigurationSource().apply {
             registerCorsConfiguration("/**", CorsConfiguration().apply {
                 allowCredentials = true
-                addAllowedOriginPattern("http://localhost:8086/")
+                addAllowedOriginPattern("http://localhost:8086")
                 addAllowedHeader("*")
                 addAllowedMethod("*")
             })

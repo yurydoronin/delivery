@@ -2,12 +2,9 @@ package delivery.core.domain.model.order
 
 import common.types.base.Aggregate
 import delivery.core.domain.kernel.Location
-import jakarta.persistence.Column
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.Table
+import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
+import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
+import jakarta.persistence.*
 import java.util.UUID
 
 @Entity
@@ -33,7 +30,9 @@ class Order private constructor(
     companion object {
         fun of(id: UUID, location: Location, volume: Int): Order {
             require(volume > 0) { "Volume must be positive" }
-            return Order(id, location, volume)
+            val order = Order(id, location, volume)
+            order.addDomainEvent(OrderCreatedDomainEvent(order))
+            return order
         }
     }
 
@@ -47,6 +46,8 @@ class Order private constructor(
         require(_status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
         require(_courierId != null) { "Cannot complete an order without an assigned courier" }
         _status = OrderStatus.COMPLETED
+
+        addDomainEvent(OrderCompletedDomainEvent(this))
     }
 }
 
