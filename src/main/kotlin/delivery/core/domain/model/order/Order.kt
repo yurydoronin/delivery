@@ -44,7 +44,7 @@ class Order private constructor(
 
     fun complete() {
         require(_status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
-        require(_courierId != null) { "Cannot complete an order without an assigned courier" }
+        checkNotNull(_courierId) { "Cannot complete an order without an assigned courier" }
         _status = OrderStatus.COMPLETED
 
         addDomainEvent(OrderCompletedDomainEvent(this))

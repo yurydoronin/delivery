@@ -8,5 +8,5 @@ class OrderCompletedDomainEvent(
     order: Order
 ) : DomainEvent(order) {
     val orderId: UUID = order.id
-    val courierId: UUID = checkNotNull(order.courierId)
+    val courierId: UUID = order.courierId!!
 }
