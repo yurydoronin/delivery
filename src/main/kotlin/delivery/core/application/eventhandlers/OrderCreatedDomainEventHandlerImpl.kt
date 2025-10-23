@@ -12,6 +12,6 @@ class OrderCreatedDomainEventHandlerImpl(
 
     @EventListener
     override fun handle(event: OrderCreatedDomainEvent) {
-        producer.publish(event)
+        producer.publishOrderCreated(event)
     }
 }

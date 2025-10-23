@@ -1,11 +1,12 @@
 package delivery.infrastructure.output.adapters.kafka
 
+import com.google.protobuf.Message
 import com.google.protobuf.util.JsonFormat
 import com.google.protobuf.util.Timestamps.fromMillis
-import common.types.base.DomainEvent
 import delivery.core.application.ports.output.MessageBusProducerPort
 import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
@@ -16,40 +17,36 @@ import queues.orderstatuschanged.OrderCreatedIntegrationEvent
 class NotificationServiceProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
     @param:Value("app.kafka.order-status-changed-topic")
-    private val topic: String
+    private val topic: String,
 ) : MessageBusProducerPort {
 
-    override fun <E : DomainEvent> publish(event: E) {
-        when (event) {
-            is OrderCreatedDomainEvent -> {
-                val integrationEventAsJson = JsonFormat.printer().alwaysPrintFieldsWithNoPresence()
-                    .print(event.toIntegrationEvent())
+    private val log = LoggerFactory.getLogger(NotificationServiceProducer::class.java)
+    private val printer = JsonFormat.printer().alwaysPrintFieldsWithNoPresence()
 
-                kafkaTemplate.send(topic, event.orderId.toString(), integrationEventAsJson)
+    override fun publishOrderCreated(event: OrderCreatedDomainEvent) =
+        sendEventToKafka(event.orderId.toString(), event.toIntegrationEvent())
+
+    override fun publishOrderCompleted(event: OrderCompletedDomainEvent) =
+        sendEventToKafka(event.orderId.toString(), event.toIntegrationEvent())
+
+    fun sendEventToKafka(key: String, integrationEvent: Message) {
+        val json = printer.print(integrationEvent)
+        kafkaTemplate.send(topic, key, json)
+            .whenComplete { _, ex ->
+                ex?.let { log.error("Failed to send event: $key", it) }
+                    ?: log.info("Event sent: $key")
             }
-
-            is OrderCompletedDomainEvent -> {
-                val integrationEventAsJson = JsonFormat.printer().alwaysPrintFieldsWithNoPresence()
-                    .print(event.toIntegrationEvent())
-
-                kafkaTemplate.send(topic, event.orderId.toString(), integrationEventAsJson)
-            }
-
-            else -> {
-                "Unsupported event type: ${event::class.simpleName}"
-            }
-        }
     }
 }
 
-fun OrderCreatedDomainEvent.toIntegrationEvent(): OrderCreatedIntegrationEvent =
+private fun OrderCreatedDomainEvent.toIntegrationEvent(): OrderCreatedIntegrationEvent =
     OrderCreatedIntegrationEvent.newBuilder()
         .setEventId(eventId.toString())
         .setOrderId(orderId.toString())
         .setOccurredAt(fromMillis(occurredOnUtc.toEpochMilli()))
         .build()
 
-fun OrderCompletedDomainEvent.toIntegrationEvent(): OrderCompletedIntegrationEvent =
+private fun OrderCompletedDomainEvent.toIntegrationEvent(): OrderCompletedIntegrationEvent =
     OrderCompletedIntegrationEvent.newBuilder()
         .setEventId(eventId.toString())
         .setOrderId(orderId.toString())

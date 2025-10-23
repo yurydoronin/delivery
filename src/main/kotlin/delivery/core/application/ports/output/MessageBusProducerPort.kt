@@ -1,7 +1,9 @@
 package delivery.core.application.ports.output
 
-import common.types.base.DomainEvent
+import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
+import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
 
 interface MessageBusProducerPort {
-    fun <E : DomainEvent> publish(event: E)
+    fun publishOrderCreated(event: OrderCreatedDomainEvent)
+    fun publishOrderCompleted(event: OrderCompletedDomainEvent)
 }

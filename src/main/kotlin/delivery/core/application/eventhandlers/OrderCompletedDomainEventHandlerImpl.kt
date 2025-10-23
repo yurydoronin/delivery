@@ -12,6 +12,6 @@ class OrderCompletedDomainEventHandlerImpl(
 
     @EventListener
     override fun handle(event: OrderCompletedDomainEvent) {
-        producer.publish(event)
+        producer.publishOrderCompleted(event)
     }
 }
