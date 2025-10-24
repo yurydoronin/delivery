@@ -5,14 +5,15 @@ import common.types.error.BusinessError
 import delivery.core.domain.kernel.Location
 import java.util.UUID
 
-interface GetActiveOrdersUseCase {
-    fun execute(): Either<BusinessError, List<GetActiveOrdersResult>>
+interface GetAllCouriersUseCase {
+    fun execute(): Either<BusinessError, List<GetAllCouriersResult>>
 }
 
 /**
- * (output DTO) List of active orders
+ * (output DTO) List of couriers
  */
-data class GetActiveOrdersResult(
-    val orderId: UUID,
+data class GetAllCouriersResult(
+    val courierId: UUID,
+    val name: String,
     val location: Location
 )

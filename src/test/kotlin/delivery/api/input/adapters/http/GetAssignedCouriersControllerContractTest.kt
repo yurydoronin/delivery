@@ -3,7 +3,7 @@ package delivery.api.input.adapters.http
 import arrow.core.Either
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import delivery.core.application.AssignedCouriersError
+import delivery.core.application.ports.input.queries.AssignedCouriersError
 import delivery.core.application.ports.input.queries.GetAssignedCouriersResult
 import delivery.core.application.ports.input.queries.GetAssignedCouriersUseCase
 import delivery.core.domain.kernel.Location
@@ -32,7 +32,7 @@ class GetAssignedCouriersControllerContractTest @Autowired constructor(
         val courierId = UUID.randomUUID()
         val result = GetAssignedCouriersResult(courierId, "Вася", Location.of(1, 1))
 
-        every { useCase.getAllAssigned() } returns Either.Right(listOf(result))
+        every { useCase.execute() } returns Either.Right(listOf(result))
 
         val expectedJson = objectMapper.writeValueAsString(
             listOf(
@@ -52,7 +52,7 @@ class GetAssignedCouriersControllerContractTest @Autowired constructor(
     @Test
     fun `fails to get assigned couriers`() {
         // Arrange
-        every { useCase.getAllAssigned() } returns Either.Left(AssignedCouriersError.NoAssignedCouriers)
+        every { useCase.execute() } returns Either.Left(AssignedCouriersError.NoAssignedCouriers)
 
         // Act & Assert
         mockMvc.perform(

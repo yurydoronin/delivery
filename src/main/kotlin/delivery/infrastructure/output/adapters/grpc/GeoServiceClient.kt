@@ -1,8 +1,7 @@
 package delivery.infrastructure.output.adapters.grpc
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import clients.geo.GeoGrpc
 import clients.geo.GetGeolocationRequest
 import clients.geo.locationOrNull
@@ -30,18 +29,18 @@ class GeoServiceClient(
         if (!channel.isShutdown) channel.shutdown()
     }
 
-    override fun getLocation(street: String): Either<GeoServiceClientError, Location> {
+    override fun getLocation(street: String): Either<GeoServiceClientError, Location> = either {
         val response = stub.getGeolocation(
             GetGeolocationRequest.newBuilder()
                 .setStreet(street)
                 .build()
         )
 
-        return response.locationOrNull
-            ?.toDomain()?.right()
-            ?: GeoServiceClientError.LocationNotFound.left()
-    }
+        val location = response.locationOrNull
+            ?: raise(GeoServiceClientError.LocationNotFound)
 
+        location.toDomain()
+    }
 }
 
 fun clients.geo.Location.toDomain() = Location.of(x, y)

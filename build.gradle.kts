@@ -47,7 +47,6 @@ dependencies {
     implementation("io.grpc:grpc-protobuf:1.76.0")
     implementation("io.grpc:grpc-netty-shaded:1.76.0")
     implementation("com.google.protobuf:protobuf-kotlin:4.32.1")
-    // (опционально для отладки)
     implementation("com.google.protobuf:protobuf-java-util:4.32.1")
 
     testImplementation(kotlin("test"))

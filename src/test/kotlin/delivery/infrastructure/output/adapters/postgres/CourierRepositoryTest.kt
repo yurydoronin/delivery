@@ -1,5 +1,6 @@
 package delivery.infrastructure.output.adapters.postgres
 
+import arrow.core.raise.either
 import com.ninjasquad.springmockk.MockkBean
 import delivery.core.application.ports.output.AggregateTracker
 import delivery.core.application.ports.output.UnitOfWork
@@ -27,84 +28,92 @@ class CourierRepositoryTest @Autowired constructor(
 
     @Test
     fun `add new courier`() {
-        // Arrange
-        val courier = Courier.of("Новый", 3, Location.of(1, 1))
+        either {
+            // Arrange
+            val courier = Courier.of("Новый", 3, Location.of(1, 1)).bind()
 
-        // Act
-        courierRepository.track(courier)
-        every { aggregateTracker.getTracked() } returns listOf(courier)
-        unitOfWork.commit()
+            // Act
+            courierRepository.track(courier)
+            every { aggregateTracker.getTracked() } returns listOf(courier)
+            unitOfWork.commit()
 
-        val newCourier = courierRepository.get(courier.id)
-        newCourier shouldNotBe null
-        newCourier!!.name shouldBe "Новый"
-        verify { aggregateTracker.track(courier) }
+            val newCourier = courierRepository.get(courier.id)
+            newCourier shouldNotBe null
+            newCourier!!.name shouldBe "Новый"
+            verify { aggregateTracker.track(courier) }
+        }
     }
 
     @Test
     fun `update existing courier`() {
-        // Arrange
-        val courier = Courier.of("Обновляемый", 2, Location.of(2, 2))
-        courierRepository.track(courier)
-        every { aggregateTracker.getTracked() } returns listOf(courier)
-        unitOfWork.commit()
+        either {
+            // Arrange
+            val courier = Courier.of("Обновляемый", 2, Location.of(2, 2)).bind()
+            courierRepository.track(courier)
+            every { aggregateTracker.getTracked() } returns listOf(courier)
+            unitOfWork.commit()
 
-        val updatedLocation = Location.of(5, 5)
-        courier.location = updatedLocation
+            val updatedLocation = Location.of(5, 5)
+            courier.location = updatedLocation
 
-        // Act
-        courierRepository.track(courier)
-        every { aggregateTracker.getTracked() } returns listOf(courier)
-        unitOfWork.commit()
+            // Act
+            courierRepository.track(courier)
+            every { aggregateTracker.getTracked() } returns listOf(courier)
+            unitOfWork.commit()
 
-        // Assert
-        val updated = courierRepository.get(courier.id)
-        updated!!.location shouldBe updatedLocation
-        verify { aggregateTracker.track(courier) }
+            // Assert
+            val updated = courierRepository.get(courier.id)
+            updated!!.location shouldBe updatedLocation
+            verify { aggregateTracker.track(courier) }
+        }
     }
 
     @Test
     fun `get courier`() {
-        // Arrange
-        val courier = Courier.of("Иван", 3, Location.of(1, 1))
-        courierRepository.track(courier)
-        every { aggregateTracker.getTracked() } returns listOf(courier)
-        unitOfWork.commit()
+        either {
+            // Arrange
+            val courier = Courier.of("Иван", 3, Location.of(1, 1)).bind()
+            courierRepository.track(courier)
+            every { aggregateTracker.getTracked() } returns listOf(courier)
+            unitOfWork.commit()
 
-        // Act
-        val found = courierRepository.get(courier.id)
+            // Act
+            val found = courierRepository.get(courier.id)
 
-        // Assert
-        found shouldNotBe null
-        found!!.id shouldBe courier.id
-        found.name shouldBe courier.name
-        found.speed shouldBe courier.speed
+            // Assert
+            found shouldNotBe null
+            found!!.id shouldBe courier.id
+            found.name shouldBe courier.name
+            found.speed shouldBe courier.speed
+        }
     }
 
     @Test
     fun `get available couriers`() {
-        // Arrange
-        val free1 = Courier.of("Свободный-1", 2, Location.of(1, 1))
-        val free2 = Courier.of("Свободный-2", 2, Location.of(2, 2))
-        val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 5)
-        val busy = Courier.of("Занятой", 2, Location.of(3, 3))
-        busy.takeOrder(order)
+        either {
+            // Arrange
+            val free1 = Courier.of("Свободный-1", 2, Location.of(1, 1)).bind()
+            val free2 = Courier.of("Свободный-2", 2, Location.of(2, 2)).bind()
+            val order = Order.of(UUID.randomUUID(), Location.of(5, 5), 5)
+            val busy = Courier.of("Занятой", 2, Location.of(3, 3)).bind()
+            busy.takeOrder(order)
 
-        courierRepository.track(free1)
-        courierRepository.track(free2)
-        courierRepository.track(busy)
-        every { aggregateTracker.getTracked() } returns listOf(free1, free2, busy)
-        unitOfWork.commit()
+            courierRepository.track(free1)
+            courierRepository.track(free2)
+            courierRepository.track(busy)
+            every { aggregateTracker.getTracked() } returns listOf(free1, free2, busy)
+            unitOfWork.commit()
 
-        // Act
-        val available = courierRepository.getAvailableCouriers()
+            // Act
+            val available = courierRepository.getAvailableCouriers()
 
-        // Assert
-        available.shouldHaveSize(2)
-        available.map { it.name }.shouldContainAll("Свободный-1", "Свободный-2")
-        available.map { it.id }.shouldNotContain(busy.id)
-        verify { aggregateTracker.track(free1) }
-        verify { aggregateTracker.track(free2) }
-        verify { aggregateTracker.track(busy) }
+            // Assert
+            available.shouldHaveSize(2)
+            available.map { it.name }.shouldContainAll("Свободный-1", "Свободный-2")
+            available.map { it.id }.shouldNotContain(busy.id)
+            verify { aggregateTracker.track(free1) }
+            verify { aggregateTracker.track(free2) }
+            verify { aggregateTracker.track(busy) }
+        }
     }
 }

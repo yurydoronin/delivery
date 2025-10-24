@@ -6,11 +6,11 @@ import delivery.core.domain.kernel.Location
 import java.util.UUID
 
 interface GetAssignedCouriersUseCase {
-    fun getAllAssigned(): Either<BusinessError, List<GetAssignedCouriersResult>>
+    fun execute(): Either<BusinessError, List<GetAssignedCouriersResult>>
 }
 
 /**
- * (output DTO) List of Couriers
+ * (output DTO) List of assigned couriers
  */
 data class GetAssignedCouriersResult(
     val courierId: UUID,

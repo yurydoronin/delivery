@@ -5,7 +5,7 @@ import delivery.infrastructure.output.adapters.grpc.GeoServiceClientError
 import java.util.UUID
 
 interface OrderCreationUseCase {
-    fun create(command: OrderCreationCommand): Either<GeoServiceClientError, Unit>
+    fun execute(command: OrderCreationCommand): Either<GeoServiceClientError, Unit>
 }
 
 /**

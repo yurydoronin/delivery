@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package OrderStatusChanged;
+
+// Kotlin (используется java_package)
+option java_package = "queues.orderstatuschanged";
+option java_multiple_files = true;
+
+import "google/protobuf/timestamp.proto";
+
+message OrderCreatedIntegrationEvent {
+  string event_id = 1;
+  string order_id = 2;
+  google.protobuf.Timestamp occurred_at = 3;
+}
+
+message OrderCompletedIntegrationEvent {
+  string event_id = 1;
+  string order_id = 2;
+  string courier_id = 3;
+  google.protobuf.Timestamp occurred_at = 4;
+}

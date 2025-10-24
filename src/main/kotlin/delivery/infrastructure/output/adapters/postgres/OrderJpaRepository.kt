@@ -8,15 +8,7 @@ import org.springframework.data.jpa.repository.Query
 
 interface OrderJpaRepository : JpaRepository<Order, UUID> {
 
-    @Query(
-        """
-        select o from Order o 
-        where o._status = :status 
-        order by o.id asc 
-        limit 1
-    """
-    )
-    fun findFirstByStatus(status: OrderStatus): Order?
+    fun findFirstBy_status(status: OrderStatus): Order?
 
     @Query("select o from Order o where o._status = :status")
     fun findAllByStatus(status: OrderStatus): List<Order>

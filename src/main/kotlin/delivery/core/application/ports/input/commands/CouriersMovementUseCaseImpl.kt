@@ -1,10 +1,8 @@
-package delivery.core.application
+package delivery.core.application.ports.input.commands
 
 import arrow.core.Either
-import arrow.core.left
-import arrow.core.right
+import arrow.core.raise.either
 import common.types.error.BusinessError
-import delivery.core.application.ports.input.commands.CouriersMovementUseCase
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -13,35 +11,38 @@ import java.util.UUID
 import org.springframework.stereotype.Service
 
 @Service
-class CouriersMovementService(
+class CouriersMovementUseCaseImpl(
     private val courierRepository: CourierRepositoryPort,
     private val orderRepository: OrderRepositoryPort,
     private val unitOfWork: UnitOfWork
 ) : CouriersMovementUseCase {
 
-    override fun move(): Either<BusinessError, Unit> {
+    override fun execute(): Either<BusinessError, Unit> = either {
         val couriers = courierRepository.getAllCouriers()
-            .takeIf { it.isNotEmpty() } ?: return MovementError.NoCouriers.left()
+            .takeIf { it.isNotEmpty() }
+            ?: raise(MovementError.NoCouriers)
 
         val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
             .associateBy { it.courierId!! }
-            .takeIf { it.isNotEmpty() } ?: return MovementError.NoOrders.left()
+            .takeIf { it.isNotEmpty() }
+            ?: raise(MovementError.NoOrders)
 
         couriers.forEach { courier ->
             // берем заказ по курьеру или пропускаем курьера, у которого нет заказов
             val order = assignedOrders[courier.id] ?: return@forEach
+
             courier.move(order.location)
 
             if (courier.location == order.location) {
                 order.complete()
                 courier.completeOrder(order)
             }
+
             courierRepository.track(courier)
             orderRepository.track(order)
         }
-        unitOfWork.commit()
 
-        return Unit.right()
+        unitOfWork.commit()
     }
 }
 

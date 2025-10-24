@@ -10,6 +10,5 @@ import delivery.core.domain.model.order.Order
  * Она берёт любой заказ в статусе Created (не распределённый) и ищет самого подходящего курьера.
  */
 interface OrderDispatcher {
-
     fun dispatch(order: Order, couriers: List<Courier>): Either<BusinessError, Courier>
 }
