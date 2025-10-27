@@ -16,13 +16,13 @@ import kotlin.math.abs
 @Entity
 @Table(name = "couriers")
 class Courier private constructor(
-    @Column(nullable = false)
+    @Column
     val name: String,
     /**
      * Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
      * Скорость курьера зависит от наличия/отсутствия транспорта.
      */
-    @Column(nullable = false)
+    @Column
     val speed: Int,
     @Embedded
     var location: Location,
