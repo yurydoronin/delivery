@@ -7,7 +7,7 @@ import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
-import queues.basketconfirmed.BasketConfirmedIntegrationEvent
+import queues.basket.BasketConfirmedIntegrationEvent
 
 @Service
 class BasketConfirmedConsumer(
@@ -15,9 +15,9 @@ class BasketConfirmedConsumer(
 ) {
     private val log = LoggerFactory.getLogger(BasketConfirmedConsumer::class.java)
 
-    @KafkaListener(topics = ["basket.confirmed"], groupId = "basket-group")
+    @KafkaListener(topics = ["baskets.events"], groupId = "basket-group")
     fun listen(message: String) {
-        try {
+        runCatching {
             val builder = BasketConfirmedIntegrationEvent.newBuilder()
             JsonFormat.parser().merge(message, builder)
             val event = builder.build()
@@ -34,7 +34,7 @@ class BasketConfirmedConsumer(
                 ifLeft = { error -> log.error("Failed to create order: $error") },
                 ifRight = { log.info("Order created successfully for basketId=${event.basketId}") }
             )
-        } catch (ex: Exception) {
+        }.onFailure { ex ->
             log.error(ex.message, ex)
         }
     }
