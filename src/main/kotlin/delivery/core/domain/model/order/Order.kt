@@ -31,7 +31,7 @@ class Order private constructor(
         fun of(id: UUID, location: Location, volume: Int): Order {
             require(volume > 0) { "Volume must be positive" }
             val order = Order(id, location, volume)
-            order.addDomainEvent(OrderCreatedDomainEvent(order))
+            order.addDomainEvent(OrderCreatedDomainEvent(order.id))
             return order
         }
     }
@@ -47,7 +47,7 @@ class Order private constructor(
         checkNotNull(_courierId) { "Cannot complete an order without an assigned courier" }
         _status = OrderStatus.COMPLETED
 
-        addDomainEvent(OrderCompletedDomainEvent(this))
+        addDomainEvent(OrderCompletedDomainEvent(orderId = id, courierId!!))
     }
 }
 

@@ -5,9 +5,9 @@ import jakarta.persistence.MappedSuperclass
 import org.springframework.data.util.ProxyUtils
 
 @MappedSuperclass
-abstract class DomainEntity<T : Any> protected constructor(
+abstract class DomainEntity<ID : Any> protected constructor(
     @Id
-    open val id: T
+    open val id: ID
 ) {
     final override fun equals(other: Any?): Boolean {
         other ?: return false

@@ -1,8 +1,8 @@
 package common.types.base
 
-abstract class Aggregate<T : Any> protected constructor(
-    id: T
-) : DomainEntity<T>(id), AggregateRoot {
+abstract class Aggregate<ID : Any> protected constructor(
+    id: ID
+) : DomainEntity<ID>(id), AggregateRoot<ID> {
 
     protected var domainEvents: MutableList<DomainEvent>? = mutableListOf()
 

@@ -16,7 +16,7 @@ import queues.orderstatuschanged.OrderCreatedIntegrationEvent
 @Service
 class NotificationServiceProducer(
     private val kafkaTemplate: KafkaTemplate<String, String>,
-    @param:Value("app.kafka.order-status-changed-topic")
+    @param:Value("app.kafka.orders-events-topic")
     private val topic: String,
 ) : MessageBusProducerPort {
 

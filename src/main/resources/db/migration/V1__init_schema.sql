@@ -29,7 +29,3 @@ CREATE TABLE orders (
     CONSTRAINT fk_order_courier FOREIGN KEY (courier_id)
         REFERENCES couriers(id) ON DELETE SET NULL
 );
-
--- Индексы
---CREATE INDEX idx_storage_courier ON storage_places(courier_id);
---CREATE INDEX idx_order_courier ON orders(courier_id);
