@@ -2,8 +2,8 @@ package delivery.core.application
 
 import arrow.core.left
 import arrow.core.right
-import delivery.core.application.ports.input.commands.OrderCreationCommand
-import delivery.core.application.ports.input.commands.OrderCreationUseCaseImpl
+import delivery.core.application.ports.input.commands.CreateOrderCommand
+import delivery.core.application.ports.input.commands.CreateOrderUseCaseImpl
 import delivery.core.application.ports.output.GeoServiceClientPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -17,17 +17,17 @@ import io.mockk.verify
 import java.util.UUID
 import org.junit.jupiter.api.Test
 
-class OrderCreationUseCaseImplTest {
+class CreateOrderUseCaseImplTest {
 
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val geoServiceClient: GeoServiceClientPort = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
-    val sut = OrderCreationUseCaseImpl(orderRepository, geoServiceClient, unitOfWork)
+    val sut = CreateOrderUseCaseImpl(orderRepository, geoServiceClient, unitOfWork)
 
     @Test
     fun `create order`() {
         // Arrange
-        val command = OrderCreationCommand(
+        val command = CreateOrderCommand(
             orderId = UUID.randomUUID(),
             street = "Айтишная",
             volume = 10
@@ -47,7 +47,7 @@ class OrderCreationUseCaseImplTest {
     @Test
     fun `fails to create order`() {
         // Arrange
-        val command = OrderCreationCommand(
+        val command = CreateOrderCommand(
             orderId = UUID.randomUUID(),
             street = "Айтишная",
             volume = 10

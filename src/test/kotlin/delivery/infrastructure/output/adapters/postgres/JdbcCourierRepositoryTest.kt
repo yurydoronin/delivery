@@ -18,9 +18,9 @@ import java.util.UUID
 import kotlin.test.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class CourierRepositoryTest @Autowired constructor(
+class JdbcCourierRepositoryTest @Autowired constructor(
     private val unitOfWork: UnitOfWork,
-    private val courierRepository: CourierRepository
+    private val jdbcCourierRepository: JdbcCourierRepository
 ) : BaseRepositoryTest() {
     // relaxed = true позволяет не писать `every { aggregateTracker.track(any()) } just runs` явно
     @MockkBean(relaxed = true)
@@ -33,11 +33,11 @@ class CourierRepositoryTest @Autowired constructor(
             val courier = Courier.of("Новый", 3, Location.of(1, 1)).bind()
 
             // Act
-            courierRepository.track(courier)
+            jdbcCourierRepository.track(courier)
             every { aggregateTracker.getTracked() } returns listOf(courier)
             unitOfWork.commit()
 
-            val newCourier = courierRepository.get(courier.id)
+            val newCourier = jdbcCourierRepository.get(courier.id)
             newCourier shouldNotBe null
             newCourier!!.name shouldBe "Новый"
             verify { aggregateTracker.track(courier) }
@@ -49,7 +49,7 @@ class CourierRepositoryTest @Autowired constructor(
         either {
             // Arrange
             val courier = Courier.of("Обновляемый", 2, Location.of(2, 2)).bind()
-            courierRepository.track(courier)
+            jdbcCourierRepository.track(courier)
             every { aggregateTracker.getTracked() } returns listOf(courier)
             unitOfWork.commit()
 
@@ -57,12 +57,12 @@ class CourierRepositoryTest @Autowired constructor(
             courier.location = updatedLocation
 
             // Act
-            courierRepository.track(courier)
+            jdbcCourierRepository.track(courier)
             every { aggregateTracker.getTracked() } returns listOf(courier)
             unitOfWork.commit()
 
             // Assert
-            val updated = courierRepository.get(courier.id)
+            val updated = jdbcCourierRepository.get(courier.id)
             updated!!.location shouldBe updatedLocation
             verify { aggregateTracker.track(courier) }
         }
@@ -73,12 +73,12 @@ class CourierRepositoryTest @Autowired constructor(
         either {
             // Arrange
             val courier = Courier.of("Иван", 3, Location.of(1, 1)).bind()
-            courierRepository.track(courier)
+            jdbcCourierRepository.track(courier)
             every { aggregateTracker.getTracked() } returns listOf(courier)
             unitOfWork.commit()
 
             // Act
-            val found = courierRepository.get(courier.id)
+            val found = jdbcCourierRepository.get(courier.id)
 
             // Assert
             found shouldNotBe null
@@ -98,14 +98,14 @@ class CourierRepositoryTest @Autowired constructor(
             val busy = Courier.of("Занятой", 2, Location.of(3, 3)).bind()
             busy.takeOrder(order)
 
-            courierRepository.track(free1)
-            courierRepository.track(free2)
-            courierRepository.track(busy)
+            jdbcCourierRepository.track(free1)
+            jdbcCourierRepository.track(free2)
+            jdbcCourierRepository.track(busy)
             every { aggregateTracker.getTracked() } returns listOf(free1, free2, busy)
             unitOfWork.commit()
 
             // Act
-            val available = courierRepository.getAvailableCouriers()
+            val available = jdbcCourierRepository.findCouriersWithAnyFreeStorage()
 
             // Assert
             available.shouldHaveSize(2)

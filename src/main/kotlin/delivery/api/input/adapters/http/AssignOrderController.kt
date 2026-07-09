@@ -1,6 +1,6 @@
 package delivery.api.input.adapters.http
 
-import delivery.core.application.ports.input.commands.OrderAssignmentUseCase
+import delivery.core.application.ports.input.commands.AssignOrderUseCase
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/api/v1/orders/assign")
-class OrderAssignmentController(
-    private val useCase: OrderAssignmentUseCase
+class AssignOrderController(
+    private val useCase: AssignOrderUseCase
 ) {
     @PostMapping
     fun assign(): ResponseEntity<String> =

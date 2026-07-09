@@ -4,7 +4,7 @@ import common.types.base.AggregateRoot
 import java.util.UUID
 
 /**
- * Трекер регистрирует аггрегаты, которые должны участвовать в транзакции
+ * Трекер регистрирует агрегаты, которые должны участвовать в транзакции
  */
 interface AggregateTracker {
 

@@ -3,7 +3,7 @@ package delivery.api.input.adapters.http
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
 import delivery.core.application.ports.input.commands.OrderAssignmentError
-import delivery.core.application.ports.input.commands.OrderAssignmentUseCase
+import delivery.core.application.ports.input.commands.AssignOrderUseCase
 import delivery.core.domain.services.DispatchError
 import io.mockk.every
 import io.mockk.verify
@@ -15,12 +15,12 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(OrderAssignmentController::class)
-class OrderAssignmentControllerContractTest @Autowired constructor(
+@WebMvcTest(AssignOrderController::class)
+class AssignOrderControllerContractTest @Autowired constructor(
     private val mockMvc: MockMvc
 ) {
     @MockkBean
-    private lateinit var useCase: OrderAssignmentUseCase
+    private lateinit var useCase: AssignOrderUseCase
 
     @Test
     fun `assign order`() {

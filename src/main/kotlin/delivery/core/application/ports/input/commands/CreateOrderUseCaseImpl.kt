@@ -10,13 +10,13 @@ import delivery.infrastructure.output.adapters.grpc.GeoServiceClientError
 import org.springframework.stereotype.Service
 
 @Service
-class OrderCreationUseCaseImpl(
+class CreateOrderUseCaseImpl(
     private val orderRepository: OrderRepositoryPort,
     private val geoServiceClient: GeoServiceClientPort,
     private val unitOfWork: UnitOfWork
-) : OrderCreationUseCase {
+) : CreateOrderUseCase {
 
-    override fun execute(command: OrderCreationCommand): Either<GeoServiceClientError, Unit> = either {
+    override fun execute(command: CreateOrderCommand): Either<GeoServiceClientError, Unit> = either {
         val location = geoServiceClient.getLocation(command.street).bind()
         val order = Order.of(
             command.orderId,

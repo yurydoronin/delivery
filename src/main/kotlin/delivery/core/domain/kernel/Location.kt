@@ -1,19 +1,14 @@
 package delivery.core.domain.kernel
 
 import common.types.base.ValueObject
-import jakarta.persistence.Column
-import jakarta.persistence.Embeddable
 import kotlin.math.abs
 
 /**
  * Location - это координата на доске, она состоит из X (горизонталь) и Y (вертикаль)
  */
 @ConsistentCopyVisibility
-@Embeddable
 data class Location private constructor(
-    @Column(name = "location_x", nullable = false)
     val x: Int,
-    @Column(name = "location_y", nullable = false)
     val y: Int
 ) : ValueObject {
 
@@ -25,6 +20,8 @@ data class Location private constructor(
             x = x.also { require(it in MIN..MAX) { "X must be between $MIN and $MAX" } },
             y = y.also { require(it in MIN..MAX) { "Y must be between $MIN and $MAX" } }
         )
+
+        fun restore(x: Int, y: Int) = Location(x = x, y = y)
 
         fun random() = of(
             x = (MIN..MAX).random(),

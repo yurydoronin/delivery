@@ -1,8 +1,8 @@
 package delivery.api.input.adapters.kafka
 
 import com.google.protobuf.util.JsonFormat
-import delivery.core.application.ports.input.commands.OrderCreationCommand
-import delivery.core.application.ports.input.commands.OrderCreationUseCase
+import delivery.core.application.ports.input.commands.CreateOrderCommand
+import delivery.core.application.ports.input.commands.CreateOrderUseCase
 import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.kafka.annotation.KafkaListener
@@ -11,7 +11,7 @@ import queues.basket.BasketConfirmedIntegrationEvent
 
 @Service
 class BasketConfirmedConsumer(
-    private val useCase: OrderCreationUseCase
+    private val useCase: CreateOrderUseCase
 ) {
     private val log = LoggerFactory.getLogger(BasketConfirmedConsumer::class.java)
 
@@ -25,7 +25,7 @@ class BasketConfirmedConsumer(
             log.info("Received basketId=${event.basketId} with volume=${event.volume}")
 
             useCase.execute(
-                OrderCreationCommand(
+                CreateOrderCommand(
                     orderId = UUID.fromString(event.basketId),
                     street = event.address.street,
                     volume = event.volume

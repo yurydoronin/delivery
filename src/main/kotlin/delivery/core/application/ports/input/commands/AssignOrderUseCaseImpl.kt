@@ -10,18 +10,18 @@ import delivery.core.domain.services.OrderDispatcher
 import org.springframework.stereotype.Service
 
 @Service
-class OrderAssignmentUseCaseImpl(
+class AssignOrderUseCaseImpl(
     private val courierRepository: CourierRepositoryPort,
     private val orderRepository: OrderRepositoryPort,
     private val orderDispatcher: OrderDispatcher,
     private val unitOfWork: UnitOfWork
-) : OrderAssignmentUseCase {
+) : AssignOrderUseCase {
 
     override fun execute(): Either<BusinessError, Unit> = either {
         val order = orderRepository.findAnyCreated()
             ?: raise(OrderAssignmentError.OrderNotFound)
 
-        val couriers = courierRepository.getAvailableCouriers()
+        val couriers = courierRepository.findCouriersWithAnyFreeStorage()
         val courier = orderDispatcher.dispatch(order, couriers).bind()
 
         orderRepository.track(order)

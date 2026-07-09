@@ -1,7 +1,9 @@
 package delivery.api.input.adapters.http
 
-import delivery.core.application.ports.input.commands.OrderCreationCommand
-import delivery.core.application.ports.input.commands.OrderCreationUseCase
+import com.fasterxml.jackson.annotation.JsonProperty
+import delivery.core.application.ports.input.commands.CreateOrderCommand
+import delivery.core.application.ports.input.commands.CreateOrderUseCase
+import delivery.core.domain.model.order.Address
 import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -11,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/orders/create")
-class OrderCreationController(
-    private val useCase: OrderCreationUseCase
+@RequestMapping("/api/v1/orders")
+class CreateOrderController(
+    private val useCase: CreateOrderUseCase
 ) {
     @PostMapping
     fun create(@RequestBody request: OrderCreationRequest): ResponseEntity<String> =
@@ -31,14 +33,15 @@ class OrderCreationController(
  * (DTO) HTTP-Request to create an order
  */
 data class OrderCreationRequest(
+    @JsonProperty("id")
     val orderId: UUID,
-    val street: String,
+    val address: Address,
     val volume: Int,
 )
 
-fun OrderCreationRequest.toCommand(): OrderCreationCommand =
-    OrderCreationCommand(
+fun OrderCreationRequest.toCommand(): CreateOrderCommand =
+    CreateOrderCommand(
         orderId = orderId,
-        street = street,
+        street = address.street,
         volume = volume,
     )

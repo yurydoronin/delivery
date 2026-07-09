@@ -1,19 +1,26 @@
 package common.types.base
 
 abstract class Aggregate<ID : Any> protected constructor(
-    id: ID
+    id: ID,
+    private var _version: Long = 0
 ) : DomainEntity<ID>(id), AggregateRoot<ID> {
 
-    protected var domainEvents: MutableList<DomainEvent>? = mutableListOf()
+    val version: Long
+        get() = _version
 
-    override fun allDomainEvents(): List<DomainEvent> = domainEvents ?: emptyList()
+    internal fun incrementVersion() {
+        _version++
+    }
+
+    private val _domainEvents: MutableList<DomainEvent> = mutableListOf()
+
+    override fun allDomainEvents(): List<DomainEvent> = _domainEvents
 
     override fun addDomainEvent(event: DomainEvent) {
-        domainEvents = domainEvents ?: mutableListOf()
-        domainEvents!!.add(event)
+        _domainEvents.add(event)
     }
 
     override fun clearDomainEvents() {
-        domainEvents?.clear()
+        _domainEvents.clear()
     }
 }

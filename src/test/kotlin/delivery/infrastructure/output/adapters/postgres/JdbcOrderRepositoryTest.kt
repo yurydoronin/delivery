@@ -19,10 +19,10 @@ import java.util.UUID
 import kotlin.test.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class OrderRepositoryTest @Autowired constructor(
+class JdbcOrderRepositoryTest @Autowired constructor(
     private val unitOfWork: UnitOfWork,
-    private val orderRepository: OrderRepository,
-    private val courierRepository: CourierRepository
+    private val jdbcOrderRepository: JdbcOrderRepository,
+    private val jdbcCourierRepository: JdbcCourierRepository
 ) : BaseRepositoryTest() {
 
     @MockkBean(relaxed = true)
@@ -37,12 +37,12 @@ class OrderRepositoryTest @Autowired constructor(
         val order = Order.of(UUID.randomUUID(), Location.of(2, 2), 3)
 
         // Act
-        orderRepository.track(order)
+        jdbcOrderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
         // Assert
-        val newOrder = orderRepository.get(order.id)
+        val newOrder = jdbcOrderRepository.get(order.id)
         newOrder shouldNotBe null
         newOrder!!.volume shouldBe 3
         verify { aggregateTracker.track(order) }
@@ -53,20 +53,20 @@ class OrderRepositoryTest @Autowired constructor(
         either {
             // Arrange
             val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 2)
-            orderRepository.track(order)
+            jdbcOrderRepository.track(order)
             val courier = Courier.of("Вася", 2, Location.of(2, 2)).bind()
-            courierRepository.track(courier)
+            jdbcCourierRepository.track(courier)
             every { aggregateTracker.getTracked() } returns listOf(order, courier)
             unitOfWork.commit()
             order.assignToCourier(courier.id)
 
             // Act
-            orderRepository.track(order)
+            jdbcOrderRepository.track(order)
             every { aggregateTracker.getTracked() } returns listOf(order)
             unitOfWork.commit()
 
             // Assert
-            val updatedOrder = orderRepository.get(order.id)
+            val updatedOrder = jdbcOrderRepository.get(order.id)
             updatedOrder shouldNotBe null
             updatedOrder!!.status shouldBe OrderStatus.ASSIGNED
             updatedOrder.courierId shouldBe courier.id
@@ -78,12 +78,12 @@ class OrderRepositoryTest @Autowired constructor(
     fun `get order by id`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 10)
-        orderRepository.track(order)
+        jdbcOrderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
 
         // Act
-        val found = orderRepository.get(order.id)
+        val found = jdbcOrderRepository.get(order.id)
 
         // Assert
         found shouldNotBe null
@@ -97,13 +97,13 @@ class OrderRepositoryTest @Autowired constructor(
         // Arrange
         val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
         val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
-        orderRepository.track(order1)
-        orderRepository.track(order2)
+        jdbcOrderRepository.track(order1)
+        jdbcOrderRepository.track(order2)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2)
         unitOfWork.commit()
 
         // Act
-        val createdOrder = orderRepository.findAnyCreated()
+        val createdOrder = jdbcOrderRepository.findAnyCreated()
 
         // Assert
         createdOrder shouldNotBe null
@@ -119,27 +119,27 @@ class OrderRepositoryTest @Autowired constructor(
             val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
             val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
             val order3 = Order.of(UUID.randomUUID(), Location.of(3, 3), 3)
-            orderRepository.track(order1)
-            orderRepository.track(order2)
-            orderRepository.track(order3)
+            jdbcOrderRepository.track(order1)
+            jdbcOrderRepository.track(order2)
+            jdbcOrderRepository.track(order3)
             every { aggregateTracker.getTracked() } returns listOf(order1, order2, order3)
             unitOfWork.commit()
 
             val courier1 = Courier.of("Вася", 2, Location.of(2, 2)).bind()
             val courier2 = Courier.of("Петя", 2, Location.of(5, 5)).bind()
-            courierRepository.track(courier1)
-            courierRepository.track(courier2)
+            jdbcCourierRepository.track(courier1)
+            jdbcCourierRepository.track(courier2)
             every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)
             unitOfWork.commit()
             order1.assignToCourier(courier1.id)
             order2.assignToCourier(courier2.id)
-            orderRepository.track(order1)
-            orderRepository.track(order2)
+            jdbcOrderRepository.track(order1)
+            jdbcOrderRepository.track(order2)
             every { aggregateTracker.getTracked() } returns listOf(order1, order2)
             unitOfWork.commit()
 
             // Act
-            val assignedOrders = orderRepository.findAllAssigned()
+            val assignedOrders = jdbcOrderRepository.findAllAssigned()
 
             // Assert
             assignedOrders.shouldHaveSize(2)

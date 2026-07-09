@@ -2,28 +2,24 @@ package delivery.core.domain.model.courier
 
 import arrow.core.Either
 import arrow.core.raise.either
+import com.github.f4b6a3.uuid.UuidCreator
 import common.types.base.DomainEntity
 import common.types.error.BusinessError
-import jakarta.persistence.*
 import java.util.UUID
+import kotlin.enums.enumEntries
 
 /**
  * Место хранения заказа (рюкзак, багажник курьера)
  */
-@Entity
-@Table(name = "storage_places")
 class StoragePlace private constructor(
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    id: UUID,
     val name: StoragePlaceName,
     /**
      * Допустимый объем места хранения
      */
-    @Column(name = "total_volume", nullable = false)
     val totalVolume: Int,
-) : DomainEntity<UUID>(UUID.randomUUID()) {
+) : DomainEntity<UUID>(id) {
 
-    @Column(name = "order_id")
     private var _orderId: UUID? = null
     val orderId: UUID?
         get() = _orderId
@@ -31,7 +27,16 @@ class StoragePlace private constructor(
     companion object {
         fun of(name: StoragePlaceName, totalVolume: Int): StoragePlace {
             require(totalVolume > 0) { "Total volume must be greater than 0" }
-            return StoragePlace(name, totalVolume)
+            return StoragePlace(id = UuidCreator.getTimeOrderedEpoch(), name, totalVolume)
+        }
+
+        fun restore(
+            id: UUID,
+            name: StoragePlaceName,
+            totalVolume: Int,
+            orderId: UUID?,
+        ) = StoragePlace(id, name, totalVolume).apply {
+            _orderId = orderId
         }
     }
 
@@ -82,6 +87,15 @@ enum class StoragePlaceName(val displayName: String) {
             entries.firstOrNull { it.displayName.equals(name, ignoreCase = true) }
                 ?: raise(StorageError.UnknownStoragePlace(name))
         }
+
+        /**
+         * Используется при восстановлении из БД.
+         * Некорректное значение означает нарушение целостности данных.
+         */
+        fun restore(name: String): StoragePlaceName =
+            enumEntries<StoragePlaceName>()
+                .firstOrNull { it.name == name }
+                ?: error("Unknown storage place in database: $name")
     }
 }
 

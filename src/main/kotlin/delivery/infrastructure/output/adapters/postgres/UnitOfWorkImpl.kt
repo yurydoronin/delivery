@@ -17,8 +17,8 @@ import org.springframework.transaction.annotation.Transactional
 @Scope(SCOPE_PROTOTYPE)
 class UnitOfWorkImpl(
     private val tracker: AggregateTracker,
-    private val courierRepository: CourierJpaRepository,
-    private val orderRepository: OrderJpaRepository,
+    private val jdbcCourierRepository: JdbcCourierRepository,
+    private val jdbcOrderRepository: JdbcOrderRepository,
     private val outboxRepository: OutboxRepository,
     private val objectMapper: ObjectMapper,
 ) : UnitOfWork {
@@ -30,8 +30,10 @@ class UnitOfWorkImpl(
         try {
             tracker.getTracked().forEach { aggregate ->
                 when (aggregate) {
-                    is Courier -> courierRepository.save(aggregate)
-                    is Order -> orderRepository.save(aggregate)
+                    // optimistic locking через version.
+                    // Защищает от конкурентного изменения одного агрегата.
+                    is Courier -> jdbcCourierRepository.save(aggregate)
+                    is Order -> jdbcOrderRepository.save(aggregate)
                 }
                 // Сохраняем события в Outbox
                 aggregate.allDomainEvents().forEach { domainEvent ->
@@ -54,6 +56,7 @@ class UnitOfWorkImpl(
             }
         } catch (e: Exception) {
             log.error("UnitOfWork commit failed", e)
+            throw e
         } finally {
             tracker.clear()
         }

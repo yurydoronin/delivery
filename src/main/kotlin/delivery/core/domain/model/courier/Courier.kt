@@ -5,35 +5,27 @@ import arrow.core.flatMap
 import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
+import com.github.f4b6a3.uuid.UuidCreator
 import common.types.base.Aggregate
 import common.types.error.BusinessError
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.order.Order
-import jakarta.persistence.*
 import java.util.UUID
 import kotlin.math.abs
 
-@Entity
-@Table(name = "couriers")
 class Courier private constructor(
-    @Column
+    id: UUID,
+    version: Long,
     val name: String,
     /**
      * Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
      * Скорость курьера зависит от наличия/отсутствия транспорта.
      */
-    @Column
     val speed: Int,
-    @Embedded
     var location: Location,
-) : Aggregate<UUID>(UUID.randomUUID()) {
+) : Aggregate<UUID>(id, version) {
 
-    @OneToMany(
-        cascade = [CascadeType.ALL],
-        orphanRemoval = true
-    )
-    @JoinColumn(name = "courier_id")
-    private val _storagePlaces = mutableListOf<StoragePlace>()
+    private var _storagePlaces = mutableListOf<StoragePlace>()
     val storagePlaces: List<StoragePlace>
         get() = _storagePlaces.toList()
 
@@ -41,16 +33,45 @@ class Courier private constructor(
         // Каждый курьер владеет местом хранения "Сумка" объемом 10 литров
         private const val VOLUME = 10
 
-        fun of(name: String, speed: Int, location: Location, storageName: String = "Сумка"): Either<StorageError, Courier> =
+        fun of(
+            name: String,
+            speed: Int,
+            location: Location,
+            storageName: String = "Сумка"
+        ): Either<StorageError, Courier> =
             either {
                 require(name.isNotBlank()) { "Name must not be blank" }
                 require(speed > 0) { "Speed must be positive" }
 
-                val courier = Courier(name, speed, location)
+                val courier = Courier(
+                    id = UuidCreator.getTimeOrderedEpoch(),
+                    version = 0,
+                    name = name,
+                    speed = speed,
+                    location = location,
+                )
                 val storagePlace = StoragePlaceName.fromName(storageName).bind()
                 courier.addStoragePlace(storagePlace, VOLUME)
                 courier
             }
+
+        fun restore(
+            id: UUID,
+            version: Long,
+            name: String,
+            speed: Int,
+            location: Location,
+        ) = Courier(
+            id = id,
+            version = version,
+            name = name,
+            speed = speed,
+            location = location,
+        )
+    }
+
+    internal fun restoreStoragePlace(storagePlace: StoragePlace) {
+        _storagePlaces.add(storagePlace)
     }
 
     fun addStoragePlace(name: StoragePlaceName, totalVolume: Int) {
@@ -73,10 +94,13 @@ class Courier private constructor(
             place.store(order.id, order.volume)
         }
 
-    fun completeOrder(order: Order): Either<CourierError, Unit> =
-        _storagePlaces.firstOrNull { it.orderId == order.id }
-            ?.also { it.clear() }
-            ?.let { Unit.right() } ?: CourierError.OrderNotFound.left()
+    fun completeOrder(order: Order): Either<CourierError, Unit> = either {
+        val storagePlace = _storagePlaces
+            .firstOrNull { it.orderId == order.id }
+            ?: raise(CourierError.OrderNotFound)
+
+        storagePlace.clear()
+    }
 
     /**
      * Возвращает количество шагов (тактов), необходимое для доставки до цели

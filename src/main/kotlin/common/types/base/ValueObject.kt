@@ -1,4 +1,3 @@
 package common.types.base
 
-interface ValueObject {
-}
+interface ValueObject

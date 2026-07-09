@@ -4,7 +4,7 @@ import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
 import delivery.core.application.ports.input.commands.OrderAssignmentError
-import delivery.core.application.ports.input.commands.OrderAssignmentUseCaseImpl
+import delivery.core.application.ports.input.commands.AssignOrderUseCaseImpl
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -21,14 +21,14 @@ import io.mockk.verify
 import java.util.UUID
 import org.junit.jupiter.api.Test
 
-class OrderAssignmentUseCaseImplTest {
+class AssignOrderUseCaseImplTest {
 
     val courierRepository: CourierRepositoryPort = mockk(relaxed = true)
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val orderDispatcher: OrderDispatcher = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
 
-    val sut = OrderAssignmentUseCaseImpl(
+    val sut = AssignOrderUseCaseImpl(
         courierRepository,
         orderRepository,
         orderDispatcher,
@@ -45,7 +45,7 @@ class OrderAssignmentUseCaseImplTest {
             val couriers = listOf(courier1, courier2)
 
             every { orderRepository.findAnyCreated() } returns order
-            every { courierRepository.getAvailableCouriers() } returns couriers
+            every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
             every { orderDispatcher.dispatch(order, couriers) } returns courier1.right()
 
             // Act
@@ -76,7 +76,7 @@ class OrderAssignmentUseCaseImplTest {
         val couriers = emptyList<Courier>()
 
         every { orderRepository.findAnyCreated() } returns order
-        every { courierRepository.getAvailableCouriers() } returns couriers
+        every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
         every { orderDispatcher.dispatch(order, couriers) } returns DispatchError.NoAvailableCourier.left()
 
         // Act

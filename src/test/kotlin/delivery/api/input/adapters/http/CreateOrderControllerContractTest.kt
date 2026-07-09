@@ -3,8 +3,9 @@ package delivery.api.input.adapters.http
 import arrow.core.Either
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
-import delivery.core.application.ports.input.commands.OrderCreationCommand
-import delivery.core.application.ports.input.commands.OrderCreationUseCase
+import delivery.core.application.ports.input.commands.CreateOrderCommand
+import delivery.core.application.ports.input.commands.CreateOrderUseCase
+import delivery.core.domain.model.order.Address
 import delivery.infrastructure.output.adapters.grpc.GeoServiceClientError
 import io.mockk.every
 import io.mockk.verify
@@ -18,43 +19,45 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
-@WebMvcTest(OrderCreationController::class)
-class OrderCreationControllerContractTest @Autowired constructor(
+@WebMvcTest(CreateOrderController::class)
+class CreateOrderControllerContractTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val objectMapper: ObjectMapper
 ) {
     @MockkBean(relaxed = true)
-    private lateinit var useCase: OrderCreationUseCase
+    private lateinit var useCase: CreateOrderUseCase
 
     @Test
     fun `create order`() {
         // Arrange
         val orderId = UUID.randomUUID()
-        val request = OrderCreationRequest(orderId, "Main street", 5)
+        val address = Address.of("Россия", "Москва", "Ленина", 1, 10)
+        val request = OrderCreationRequest(orderId, address, 5)
 
         every { useCase.execute(request.toCommand()) } returns Either.Right(Unit)
 
         // Act & Assert
         mockMvc.perform(
-            post("/api/v1/orders/create")
+            post("/api/v1/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )
             .andExpect(status().isCreated)
 
-        verify { useCase.execute(OrderCreationCommand(orderId, "Main street", 5)) }
+        verify { useCase.execute(CreateOrderCommand(orderId, "Ленина", 5)) }
     }
 
     @Test
     fun `fails to create order`() {
         // Arrange
-        val request = OrderCreationRequest(UUID.randomUUID(), "Main street", 5)
+        val address = Address.of("Россия", "Москва", "Ленина", 1, 10)
+        val request = OrderCreationRequest(UUID.randomUUID(), address, 5)
 
         every { useCase.execute(request.toCommand()) } returns Either.Left(GeoServiceClientError.LocationNotFound)
 
         // Act & Assert
         mockMvc.perform(
-            post("/api/v1/orders/create")
+            post("/api/v1/orders")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request))
         )

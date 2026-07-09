@@ -4,35 +4,60 @@ import common.types.base.Aggregate
 import delivery.core.domain.kernel.Location
 import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
-import jakarta.persistence.*
 import java.util.UUID
 
-@Entity
-@Table(name = "orders")
+/**
+ * Заказ
+ */
 class Order private constructor(
     id: UUID,
-    @Embedded
+    version: Long,
     val location: Location,
     val volume: Int
-) : Aggregate<UUID>(id) {
+) : Aggregate<UUID>(id, version) {
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
     private var _status: OrderStatus = OrderStatus.CREATED
     val status: OrderStatus
         get() = _status
 
-    @Column(name = "courier_id")
     private var _courierId: UUID? = null
     val courierId: UUID?
         get() = _courierId
 
     companion object {
-        fun of(id: UUID, location: Location, volume: Int): Order {
+        fun of(
+            id: UUID,
+            location: Location,
+            volume: Int,
+        ): Order {
             require(volume > 0) { "Volume must be positive" }
-            val order = Order(id, location, volume)
-            order.addDomainEvent(OrderCreatedDomainEvent(order.id))
-            return order
+
+            return Order(
+                id = id,
+                version = 0,
+                location = location,
+                volume = volume,
+            )
+                .apply {
+                    addDomainEvent(OrderCreatedDomainEvent(orderId = id))
+                }
+        }
+
+        fun restore(
+            id: UUID,
+            version: Long,
+            location: Location,
+            volume: Int,
+            status: OrderStatus,
+            courierId: UUID?,
+        ) = Order(
+            id = id,
+            version = version,
+            location = location,
+            volume = volume,
+        ).apply {
+            _status = status
+            _courierId = courierId
         }
     }
 

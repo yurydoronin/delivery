@@ -5,14 +5,15 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.transaction.annotation.Transactional
-import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
+import org.testcontainers.postgresql.PostgreSQLContainer
 
 @ActiveProfiles("test")
 @SpringBootTest(
     properties = [
         "spring.kafka.listener.auto-startup=false",
-        "spring.kafka.bootstrap-servers=localhost:0"
+        "spring.kafka.bootstrap-servers=localhost:0",
+        "spring.quartz.auto-startup=false"
     ]
 )
 @Testcontainers
@@ -21,7 +22,7 @@ abstract class BaseRepositoryTest {
 
     companion object {
         @JvmStatic
-        val postgres = PostgreSQLContainer<Nothing>("postgres:16-alpine").apply {
+        val postgres = PostgreSQLContainer("postgres:18-alpine").apply {
             withDatabaseName("testdb")
             withUsername("test")
             withPassword("test")
