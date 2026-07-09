@@ -2,7 +2,7 @@ package common.types.base
 
 abstract class Aggregate<ID : Any> protected constructor(
     id: ID,
-    private var _version: Long = 0
+    private var _version: Long,
 ) : DomainEntity<ID>(id), AggregateRoot<ID> {
 
     val version: Long

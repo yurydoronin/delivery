@@ -11,7 +11,7 @@ import java.util.UUID
  */
 class Order private constructor(
     id: UUID,
-    version: Long,
+    version: Long = 0L,
     val location: Location,
     val volume: Int
 ) : Aggregate<UUID>(id, version) {
@@ -34,7 +34,6 @@ class Order private constructor(
 
             return Order(
                 id = id,
-                version = 0,
                 location = location,
                 volume = volume,
             )

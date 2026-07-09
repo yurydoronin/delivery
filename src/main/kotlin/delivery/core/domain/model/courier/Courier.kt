@@ -15,7 +15,7 @@ import kotlin.math.abs
 
 class Courier private constructor(
     id: UUID,
-    version: Long,
+    version: Long = 0L,
     val name: String,
     /**
      * Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
@@ -45,7 +45,6 @@ class Courier private constructor(
 
                 val courier = Courier(
                     id = UuidCreator.getTimeOrderedEpoch(),
-                    version = 0,
                     name = name,
                     speed = speed,
                     location = location,
