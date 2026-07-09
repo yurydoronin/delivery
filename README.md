@@ -15,7 +15,7 @@
 ### Стек технологий: 
 
 - Kotlin, Arrow-kt
-- Spring Boot, Spring Data, Spring JDBC
+- Spring Boot, Spring JDBC
 - Gradle
 - Kafka
 - gRPC
