@@ -1,5 +1,6 @@
 package delivery.infrastructure.output.adapters.postgres.outbox
 
+import java.sql.Timestamp
 import java.util.UUID
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Repository
@@ -36,9 +37,9 @@ class OutboxRepository(
             }
             .list()
 
-    fun save(message: OutboxMessage) {
+    internal fun save(message: OutboxMessage) {
         // Проверяем, есть ли дата обработки.
-        // Если сообщение новое (только что создано в памяти домена), processedOnUtc у него null
+        // Если сообщение новое (только что создано в памяти), processedOnUtc у него null
         if (message.processedOnUtc() == null) {
             insert(message)
         } else {
@@ -49,29 +50,40 @@ class OutboxRepository(
     private fun insert(message: OutboxMessage) {
         jdbcClient.sql(
             """
-        INSERT INTO outbox (id, event_type, aggregate_id, aggregate_type, payload, occurred_on_utc, processed_on_utc)
-        VALUES (:id, :eventType, :aggregateId, :aggregateType, :payload, :occurredOnUtc, NULL)
-        """.trimIndent()
+            INSERT INTO outbox (
+                id, 
+                event_type, 
+                aggregate_id, 
+                aggregate_type, 
+                payload, 
+                occurred_on_utc,
+                processed_on_utc
+            )
+            VALUES (:id, :eventType, :aggregateId, :aggregateType, :payload, :occurredOnUtc, NULL)
+            """.trimIndent()
         )
             .param("id", message.id)
             .param("eventType", message.eventType)
             .param("aggregateId", message.aggregateId)
             .param("aggregateType", message.aggregateType)
             .param("payload", message.payload)
-            .param("occurredOnUtc", java.sql.Timestamp.from(message.occurredOnUtc))
+            .param("occurredOnUtc", Timestamp.from(message.occurredOnUtc))
             .update()
     }
 
     private fun update(message: OutboxMessage) {
         val updated = jdbcClient.sql(
             """
-        UPDATE outbox
-        SET processed_on_utc = :processedOnUtc
-        WHERE id = :id
-        """.trimIndent()
+            UPDATE outbox
+            SET processed_on_utc = :processedOnUtc
+            WHERE id = :id
+            """.trimIndent()
         )
             .param("id", message.id)
-            .param("processedOnUtc", message.processedOnUtc()?.let { java.sql.Timestamp.from(it) })
+            .param(
+                "processedOnUtc", message.processedOnUtc()
+                    ?.let { Timestamp.from(it) }
+            )
             .update()
 
         check(updated == 1) {
