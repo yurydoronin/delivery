@@ -7,6 +7,6 @@ interface CourierRepositoryPort {
 
     fun track(courier: Courier)
     fun get(courierId: UUID): Courier?
-    fun findCouriersWithAnyFreeStorage(): List<Courier>
-    fun getAllCouriers(): List<Courier>
+    fun findCouriersWithAnyFreeStorageForUpdate(): List<Courier>
+    fun getAllCouriersForUpdate(): List<Courier>
 }

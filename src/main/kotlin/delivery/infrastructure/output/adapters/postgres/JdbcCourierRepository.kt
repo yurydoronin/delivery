@@ -20,7 +20,7 @@ private const val COURIERS_WITH_STORAGE_PLACES = """
         c.speed,
         c.location_x,
         c.location_y,
-        sp.id AS sp_id,
+        sp.id   AS sp_id,
         sp.name AS sp_name,
         sp.total_volume,
         sp.order_id
@@ -50,7 +50,7 @@ class JdbcCourierRepository(
             .query(ResultSetExtractor(::mapCouriers))
             .firstOrNull()
 
-    override fun findCouriersWithAnyFreeStorage(): List<Courier> =
+    override fun findCouriersWithAnyFreeStorageForUpdate(): List<Courier> =
         jdbcClient.sql(
             """
             $COURIERS_WITH_STORAGE_PLACES
@@ -60,15 +60,17 @@ class JdbcCourierRepository(
                 WHERE free_sp.courier_id = c.id
                     AND free_sp.order_id IS NULL
             )
+            FOR UPDATE -- Ждем, пока освободится лучший курьер, а не берем свободного (худшего)
             """.trimIndent()
         )
             .query(ResultSetExtractor(::mapCouriers))
 
-    override fun getAllCouriers(): List<Courier> =
+    override fun getAllCouriersForUpdate(): List<Courier> =
         jdbcClient.sql(
             """
             $COURIERS_WITH_STORAGE_PLACES
             ORDER BY c.id
+            FOR UPDATE
             """.trimIndent()
         )
             .query(ResultSetExtractor(::mapCouriers))
@@ -127,7 +129,9 @@ class JdbcCourierRepository(
         // 1. Обновляем корень агрегата с проверкой оптимистичной блокировки
         val updated = jdbcClient.sql(
             """
-            UPDATE couriers
+            -- неявно блокирует существующую строку на время записи + оптимистично проверяет, не устарели ли наши данные в памяти по мы пытались обновиться, 
+            -- предотвращение состояния гонки по принципу «Check-Then-Act».
+            UPDATE couriers -- в самом SQL-запросе UPDATE пессимистическая блокировка происходит автоматически на уровне движка базы данных 
             SET
                 version = version + 1,
                 name = :name,

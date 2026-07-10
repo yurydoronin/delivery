@@ -34,8 +34,8 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `fails to move if no couriers`() {
         // Arrange
-        every { courierRepository.getAllCouriers() } returns emptyList()
-        every { orderRepository.findAllAssigned() } returns listOf()
+        every { courierRepository.getAllCouriersForUpdate() } returns emptyList()
+        every { orderRepository.findAllAssignedForUpdate() } returns listOf()
 
         // Act
         val result = sut.execute()
@@ -49,8 +49,8 @@ class CouriersMovementUseCaseImplTest {
         either {
             // Arrange
             val courier = Courier.of("Маша", 1, Location.of(1, 1)).bind()
-            every { courierRepository.getAllCouriers() } returns listOf(courier)
-            every { orderRepository.findAllAssigned() } returns emptyList()
+            every { courierRepository.getAllCouriersForUpdate() } returns listOf(courier)
+            every { orderRepository.findAllAssignedForUpdate() } returns emptyList()
 
             // Act
             val result = sut.execute().bind()
@@ -69,8 +69,8 @@ class CouriersMovementUseCaseImplTest {
             val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
             order1.assignToCourier(courier1.id)
 
-            every { courierRepository.getAllCouriers() } returns listOf(courier1, courier2)
-            every { orderRepository.findAllAssigned() } returns listOf(order1)
+            every { courierRepository.getAllCouriersForUpdate() } returns listOf(courier1, courier2)
+            every { orderRepository.findAllAssignedForUpdate() } returns listOf(order1)
 
             // Act
             val result = sut.execute()

@@ -103,7 +103,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         unitOfWork.commit()
 
         // Act
-        val createdOrder = jdbcOrderRepository.findAnyCreated()
+        val createdOrder = jdbcOrderRepository.findAnyCreatedForUpdate()
 
         // Assert
         createdOrder shouldNotBe null
@@ -139,7 +139,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
             unitOfWork.commit()
 
             // Act
-            val assignedOrders = jdbcOrderRepository.findAllAssigned()
+            val assignedOrders = jdbcOrderRepository.findAllAssignedForUpdate()
 
             // Assert
             assignedOrders.shouldHaveSize(2)

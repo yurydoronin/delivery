@@ -9,6 +9,7 @@ import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.model.order.Order
 import java.util.UUID
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CouriersMovementUseCaseImpl(
@@ -17,12 +18,13 @@ class CouriersMovementUseCaseImpl(
     private val unitOfWork: UnitOfWork
 ) : CouriersMovementUseCase {
 
+    @Transactional
     override fun execute(): Either<BusinessError, Unit> = either {
-        val couriers = courierRepository.getAllCouriers()
+        val couriers = courierRepository.getAllCouriersForUpdate()
             .takeIf { it.isNotEmpty() }
             ?: raise(MovementError.NoCouriers)
 
-        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
+        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssignedForUpdate()
             .associateBy { it.courierId!! }
             .takeIf { it.isNotEmpty() }
             ?: raise(MovementError.NoOrders)

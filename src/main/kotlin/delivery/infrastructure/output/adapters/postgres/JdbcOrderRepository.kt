@@ -33,13 +33,14 @@ class JdbcOrderRepository(
             .optional()
             .orElse(null)
 
-    override fun findAnyCreated(): Order? =
+    override fun findAnyCreatedForUpdate(): Order? =
         jdbcClient.sql(
             """
             SELECT *
             FROM orders
             WHERE status = :status
             LIMIT 1
+            FOR UPDATE SKIP LOCKED -- Забираем первый свободный заказ монопольно
             """.trimIndent()
         )
             .param("status", OrderStatus.CREATED.name)
@@ -47,12 +48,13 @@ class JdbcOrderRepository(
             .optional()
             .orElse(null)
 
-    override fun findAllAssigned(): List<Order> =
+    override fun findAllAssignedForUpdate(): List<Order> =
         jdbcClient.sql(
             """
             SELECT *
             FROM orders
             WHERE status = :status
+            FOR UPDATE -- Блокируем активные заказы на время просчета шага движения
             """.trimIndent()
         )
             .param("status", OrderStatus.ASSIGNED.name)
@@ -74,9 +76,9 @@ class JdbcOrderRepository(
 
         jdbcClient.sql(
             """
-        INSERT INTO orders (id, version, location_x, location_y, volume, status, courier_id)
-        VALUES (:id, :version, :locationX, :locationY, :volume, :status, :courierId)
-        """.trimIndent()
+            INSERT INTO orders (id, version, location_x, location_y, volume, status, courier_id)
+            VALUES (:id, :version, :locationX, :locationY, :volume, :status, :courierId)
+            """.trimIndent()
         )
             .param("id", order.id)
             .param("version", initialVersion)
@@ -91,17 +93,17 @@ class JdbcOrderRepository(
     private fun update(order: Order) {
         val updated = jdbcClient.sql(
             """
-        UPDATE orders
-        SET
-            version = version + 1,
-            location_x = :locationX,
-            location_y = :locationY,
-            volume = :volume,
-            status = :status,
-            courier_id = :courierId
-        WHERE id = :id
-            AND version = :version
-        """.trimIndent()
+            UPDATE orders
+            SET
+                version = version + 1,
+                location_x = :locationX,
+                location_y = :locationY,
+                volume = :volume,
+                status = :status,
+                courier_id = :courierId
+            WHERE id = :id
+                AND version = :version
+            """.trimIndent()
         )
             .param("id", order.id)
             .param("version", order.version)

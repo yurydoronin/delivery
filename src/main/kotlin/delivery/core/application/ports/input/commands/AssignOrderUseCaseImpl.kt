@@ -8,6 +8,7 @@ import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.services.OrderDispatcher
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AssignOrderUseCaseImpl(
@@ -17,11 +18,12 @@ class AssignOrderUseCaseImpl(
     private val unitOfWork: UnitOfWork
 ) : AssignOrderUseCase {
 
+    @Transactional
     override fun execute(): Either<BusinessError, Unit> = either {
-        val order = orderRepository.findAnyCreated()
+        val order = orderRepository.findAnyCreatedForUpdate()
             ?: raise(OrderAssignmentError.OrderNotFound)
 
-        val couriers = courierRepository.findCouriersWithAnyFreeStorage()
+        val couriers = courierRepository.findCouriersWithAnyFreeStorageForUpdate()
         val courier = orderDispatcher.dispatch(order, couriers).bind()
 
         orderRepository.track(order)
