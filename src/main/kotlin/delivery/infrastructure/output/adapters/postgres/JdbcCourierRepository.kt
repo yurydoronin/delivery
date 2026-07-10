@@ -112,9 +112,9 @@ class JdbcCourierRepository(
         courier.storagePlaces.forEach { storagePlace ->
             jdbcClient.sql(
                 """
-            INSERT INTO storage_places (id, name, total_volume, order_id, courier_id)
-            VALUES (:id, :name, :totalVolume, :orderId, :courierId)
-            """.trimIndent()
+                INSERT INTO storage_places (id, name, total_volume, order_id, courier_id)
+                VALUES (:id, :name, :totalVolume, :orderId, :courierId)
+                """.trimIndent()
             )
                 .param("id", storagePlace.id)
                 .param("name", storagePlace.name.name)
@@ -158,14 +158,14 @@ class JdbcCourierRepository(
         courier.storagePlaces.forEach { storagePlace ->
             val updatedStoragePlace = jdbcClient.sql(
                 """
-            UPDATE storage_places
-            SET
-                name = :name,
-                total_volume = :totalVolume,
-                order_id = :orderId
-            WHERE id = :id
-                AND courier_id = :courierId
-            """.trimIndent()
+                UPDATE storage_places
+                SET
+                    name = :name,
+                    total_volume = :totalVolume,
+                    order_id = :orderId
+                WHERE id = :id
+                    AND courier_id = :courierId
+                """.trimIndent()
             )
                 .param("id", storagePlace.id)
                 .param("name", storagePlace.name.name)
