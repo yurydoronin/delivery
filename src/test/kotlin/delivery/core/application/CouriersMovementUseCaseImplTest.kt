@@ -34,8 +34,8 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `fails to move if no couriers`() {
         // Arrange
-        every { courierRepository.getAllCouriersForUpdate() } returns emptyList()
-        every { orderRepository.findAllAssignedForUpdate() } returns listOf()
+        every { courierRepository.getCouriersWithAssignedOrders() } returns emptyList()
+        every { orderRepository.findAllAssigned() } returns listOf()
 
         // Act
         val result = sut.execute()
@@ -49,8 +49,8 @@ class CouriersMovementUseCaseImplTest {
         either {
             // Arrange
             val courier = Courier.of("Маша", 1, Location.of(1, 1)).bind()
-            every { courierRepository.getAllCouriersForUpdate() } returns listOf(courier)
-            every { orderRepository.findAllAssignedForUpdate() } returns emptyList()
+            every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
+            every { orderRepository.findAllAssigned() } returns emptyList()
 
             // Act
             val result = sut.execute().bind()
@@ -65,23 +65,19 @@ class CouriersMovementUseCaseImplTest {
         either {
             // Arrange
             val courier1 = Courier.of("Маша", 4, Location.of(1, 1)).bind()
-            val courier2 = Courier.of("Коля", 1, Location.of(2, 2)).bind()
             val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
             order1.assignToCourier(courier1.id)
 
-            every { courierRepository.getAllCouriersForUpdate() } returns listOf(courier1, courier2)
-            every { orderRepository.findAllAssignedForUpdate() } returns listOf(order1)
+            every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier1)
+            every { orderRepository.findAllAssigned() } returns listOf(order1)
 
             // Act
             val result = sut.execute()
 
             // Assert
             result.shouldBeRight()
-            // courier1 достиг заказа
             courier1.location shouldBe order1.location
             order1.status shouldBe OrderStatus.COMPLETED
-            // courier2 остался на месте, так как заказа для него нет
-            courier2.location shouldBe Location.of(2, 2)
             verify { unitOfWork.commit() }
         }
     }

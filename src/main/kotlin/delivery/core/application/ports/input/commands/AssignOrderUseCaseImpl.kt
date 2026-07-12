@@ -20,10 +20,10 @@ class AssignOrderUseCaseImpl(
 
     @Transactional
     override fun execute(): Either<BusinessError, Unit> = either {
-        val order = orderRepository.findAnyCreatedForUpdate()
+        val order = orderRepository.findAnyCreated()
             ?: raise(OrderAssignmentError.OrderNotFound)
 
-        val couriers = courierRepository.findCouriersWithAnyFreeStorageForUpdate()
+        val couriers = courierRepository.findCouriersWithAnyFreeStorage()
         val courier = orderDispatcher.dispatch(order, couriers).bind()
 
         orderRepository.track(order)

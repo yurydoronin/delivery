@@ -33,14 +33,13 @@ class JdbcOrderRepository(
             .optional()
             .orElse(null)
 
-    override fun findAnyCreatedForUpdate(): Order? =
+    override fun findAnyCreated(): Order? =
         jdbcClient.sql(
             """
             SELECT *
             FROM orders
             WHERE status = :status
             LIMIT 1
-            FOR UPDATE SKIP LOCKED -- Забираем первый свободный заказ монопольно
             """.trimIndent()
         )
             .param("status", OrderStatus.CREATED.name)
@@ -48,13 +47,12 @@ class JdbcOrderRepository(
             .optional()
             .orElse(null)
 
-    override fun findAllAssignedForUpdate(): List<Order> =
+    override fun findAllAssigned(): List<Order> =
         jdbcClient.sql(
             """
             SELECT *
             FROM orders
             WHERE status = :status
-            FOR UPDATE -- Блокируем активные заказы на время просчета шага движения
             """.trimIndent()
         )
             .param("status", OrderStatus.ASSIGNED.name)
@@ -62,26 +60,20 @@ class JdbcOrderRepository(
             .list()
 
     internal fun save(order: Order) {
-        if (order.version == 0L) {
-            insert(order)
-            order.incrementVersion()
-        } else {
-            update(order)
-            order.incrementVersion()
-        }
-    }
-
-    private fun insert(order: Order) {
-        val initialVersion = order.version + 1
-
         jdbcClient.sql(
             """
-            INSERT INTO orders (id, version, location_x, location_y, volume, status, courier_id)
-            VALUES (:id, :version, :locationX, :locationY, :volume, :status, :courierId)
+            INSERT INTO orders (id, location_x, location_y, volume, status, courier_id)
+            VALUES (:id, :locationX, :locationY, :volume, :status, :courierId)
+            ON CONFLICT (id) 
+            DO UPDATE SET 
+                location_x = EXCLUDED.location_x,
+                location_y = EXCLUDED.location_y,
+                volume = EXCLUDED.volume,
+                status = EXCLUDED.status,
+                courier_id = EXCLUDED.courier_id
             """.trimIndent()
         )
             .param("id", order.id)
-            .param("version", initialVersion)
             .param("locationX", order.location.x)
             .param("locationY", order.location.y)
             .param("volume", order.volume)
@@ -89,41 +81,10 @@ class JdbcOrderRepository(
             .param("courierId", order.courierId)
             .update()
     }
-
-    private fun update(order: Order) {
-        val updated = jdbcClient.sql(
-            """
-            UPDATE orders
-            SET
-                version = version + 1,
-                location_x = :locationX,
-                location_y = :locationY,
-                volume = :volume,
-                status = :status,
-                courier_id = :courierId
-            WHERE id = :id
-                AND version = :version
-            """.trimIndent()
-        )
-            .param("id", order.id)
-            .param("version", order.version)
-            .param("locationX", order.location.x)
-            .param("locationY", order.location.y)
-            .param("volume", order.volume)
-            .param("status", order.status.name)
-            .param("courierId", order.courierId)
-            .update()
-
-        check(updated == 1) {
-            "Optimistic lock failed for order ${order.id}"
-        }
-    }
-
 
     private fun toDomain(rs: ResultSet, rowNum: Int): Order =
         Order.restore(
             id = UUID.fromString(rs.getString("id")),
-            version = rs.getLong("version"),
             location = Location.restore(
                 rs.getInt("location_x"),
                 rs.getInt("location_y"),

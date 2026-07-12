@@ -20,20 +20,21 @@ class CouriersMovementUseCaseImpl(
 
     @Transactional
     override fun execute(): Either<BusinessError, Unit> = either {
-        val couriers = courierRepository.getAllCouriersForUpdate()
+        // получаем только курьеров с заказами
+        val couriers = courierRepository.getCouriersWithAssignedOrders()
             .takeIf { it.isNotEmpty() }
             ?: raise(MovementError.NoCouriers)
 
-        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssignedForUpdate()
+        // получаем заказы, назначенные на курьеров
+        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
             .associateBy { it.courierId!! }
             .takeIf { it.isNotEmpty() }
             ?: raise(MovementError.NoOrders)
 
         couriers.forEach { courier ->
-            // берем заказ по курьеру или пропускаем курьера, у которого нет заказов
-            val order = assignedOrders[courier.id] ?: return@forEach
+            val order = assignedOrders[courier.id] // берем заказ по курьеру
 
-            courier.move(order.location)
+            courier.move(order!!.location)
 
             if (courier.location == order.location) {
                 order.complete()

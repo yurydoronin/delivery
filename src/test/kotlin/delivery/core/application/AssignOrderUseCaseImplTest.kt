@@ -44,8 +44,8 @@ class AssignOrderUseCaseImplTest {
             val courier2 = Courier.of("Коля", 1, Location.of(2, 2)).bind()
             val couriers = listOf(courier1, courier2)
 
-            every { orderRepository.findAnyCreatedForUpdate() } returns order
-            every { courierRepository.findCouriersWithAnyFreeStorageForUpdate() } returns couriers
+            every { orderRepository.findAnyCreated() } returns order
+            every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
             every { orderDispatcher.dispatch(order, couriers) } returns courier1.right()
 
             // Act
@@ -60,7 +60,7 @@ class AssignOrderUseCaseImplTest {
     @Test
     fun `fails to assign when no orders`() {
         // Arrange
-        every { orderRepository.findAnyCreatedForUpdate() } returns null
+        every { orderRepository.findAnyCreated() } returns null
 
         // Act
         val result = sut.execute()
@@ -75,8 +75,8 @@ class AssignOrderUseCaseImplTest {
         val order = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
         val couriers = emptyList<Courier>()
 
-        every { orderRepository.findAnyCreatedForUpdate() } returns order
-        every { courierRepository.findCouriersWithAnyFreeStorageForUpdate() } returns couriers
+        every { orderRepository.findAnyCreated() } returns order
+        every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
         every { orderDispatcher.dispatch(order, couriers) } returns DispatchError.NoAvailableCourier.left()
 
         // Act

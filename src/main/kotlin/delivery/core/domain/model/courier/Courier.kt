@@ -15,7 +15,6 @@ import kotlin.math.abs
 
 class Courier private constructor(
     id: UUID,
-    version: Long = 0L,
     val name: String,
     /**
      * Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
@@ -23,7 +22,7 @@ class Courier private constructor(
      */
     val speed: Int,
     var location: Location,
-) : Aggregate<UUID>(id, version) {
+) : Aggregate<UUID>(id) {
 
     private var _storagePlaces = mutableListOf<StoragePlace>()
     val storagePlaces: List<StoragePlace>
@@ -56,13 +55,11 @@ class Courier private constructor(
 
         fun restore(
             id: UUID,
-            version: Long,
             name: String,
             speed: Int,
             location: Location,
         ) = Courier(
             id = id,
-            version = version,
             name = name,
             speed = speed,
             location = location,

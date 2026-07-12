@@ -105,7 +105,7 @@ class JdbcCourierRepositoryTest @Autowired constructor(
             unitOfWork.commit()
 
             // Act
-            val available = jdbcCourierRepository.findCouriersWithAnyFreeStorageForUpdate()
+            val available = jdbcCourierRepository.findCouriersWithAnyFreeStorage()
 
             // Assert
             available.shouldHaveSize(2)

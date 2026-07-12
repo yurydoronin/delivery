@@ -1,5 +1,0 @@
--- Orders
-ALTER TABLE orders ADD COLUMN version BIGINT NOT NULL DEFAULT 0;
-
--- Couriers
-ALTER TABLE couriers ADD COLUMN version BIGINT NOT NULL DEFAULT 0;

@@ -53,9 +53,8 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         either {
             // Arrange
             val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 2)
-            jdbcOrderRepository.track(order)
             val courier = Courier.of("Вася", 2, Location.of(2, 2)).bind()
-            jdbcCourierRepository.track(courier)
+
             every { aggregateTracker.getTracked() } returns listOf(order, courier)
             unitOfWork.commit()
             order.assignToCourier(courier.id)
@@ -103,7 +102,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         unitOfWork.commit()
 
         // Act
-        val createdOrder = jdbcOrderRepository.findAnyCreatedForUpdate()
+        val createdOrder = jdbcOrderRepository.findAnyCreated()
 
         // Assert
         createdOrder shouldNotBe null
@@ -139,7 +138,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
             unitOfWork.commit()
 
             // Act
-            val assignedOrders = jdbcOrderRepository.findAllAssignedForUpdate()
+            val assignedOrders = jdbcOrderRepository.findAllAssigned()
 
             // Assert
             assignedOrders.shouldHaveSize(2)

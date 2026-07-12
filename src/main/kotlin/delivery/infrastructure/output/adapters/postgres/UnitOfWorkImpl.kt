@@ -30,8 +30,6 @@ class UnitOfWorkImpl(
         try {
             tracker.getTracked().forEach { aggregate ->
                 when (aggregate) {
-                    // optimistic locking через version.
-                    // Защищает от конкурентного изменения одного агрегата.
                     is Courier -> jdbcCourierRepository.save(aggregate)
                     is Order -> jdbcOrderRepository.save(aggregate)
                 }

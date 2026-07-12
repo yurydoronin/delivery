@@ -27,62 +27,43 @@ class GetAssignedCouriersUseCaseImplTest @Autowired constructor(
             """
         INSERT INTO couriers(
             id,
-            version,
             name,
             speed,
             location_x,
             location_y
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         """.trimIndent(),
-            courier1Id,
-            0L,
-            "Маша",
-            4,
-            1,
-            1
+            courier1Id, "Маша", 4, 1, 1
         )
 
         jdbcTemplate.update(
             """
         INSERT INTO couriers(
             id,
-            version,
             name,
             speed,
             location_x,
             location_y
         )
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
         """.trimIndent(),
-            courier2Id,
-            0L,
-            "Коля",
-            1,
-            2,
-            2
+            courier2Id, "Коля", 1, 2, 2
         )
 
         jdbcTemplate.update(
             """
         INSERT INTO orders(
             id,
-            version,
             location_x,
             location_y,
             volume,
             status,
             courier_id
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?)
         """.trimIndent(),
-            UUID.randomUUID(),
-            0L,
-            3,
-            3,
-            1,
-            "ASSIGNED",
-            courier1Id
+            UUID.randomUUID(), 3, 3, 1, "ASSIGNED", courier1Id
         )
 
         // Act

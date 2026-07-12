@@ -27,15 +27,14 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             """
                 INSERT INTO couriers(
                     id,
-                    version,
                     name,
                     speed,
                     location_x,
                     location_y
                 )
-                VALUES (?, ?, ?, ?, ?, ?)
+                VALUES (?, ?, ?, ?, ?)
                 """.trimIndent(),
-            courierId, 0L, "Маша", 4, 1, 1
+            courierId, "Маша", 4, 1, 1
         )
 
         val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 4)
@@ -46,17 +45,15 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             """
             INSERT INTO orders(
                 id,
-                version,
                 location_x,
                 location_y,
                 volume,
                 status,
                 courier_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             """.trimIndent(),
             order1.id,
-            order1.version,
             order1.location.x,
             order1.location.y,
             order1.volume,
@@ -68,18 +65,15 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             """
             INSERT INTO orders(
                 id,
-                version,
                 location_x,
                 location_y,
                 volume,
                 status,
                 courier_id
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """
-                .trimIndent(),
+            VALUES (?, ?, ?, ?, ?, ?)
+            """.trimIndent(),
             order2.id,
-            order2.version,
             order2.location.x,
             order2.location.y,
             order2.volume,

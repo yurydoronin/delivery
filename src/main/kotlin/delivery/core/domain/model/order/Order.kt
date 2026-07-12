@@ -11,10 +11,9 @@ import java.util.UUID
  */
 class Order private constructor(
     id: UUID,
-    version: Long = 0L,
     val location: Location,
     val volume: Int
-) : Aggregate<UUID>(id, version) {
+) : Aggregate<UUID>(id) {
 
     private var _status: OrderStatus = OrderStatus.CREATED
     val status: OrderStatus
@@ -44,14 +43,12 @@ class Order private constructor(
 
         fun restore(
             id: UUID,
-            version: Long,
             location: Location,
             volume: Int,
             status: OrderStatus,
             courierId: UUID?,
         ) = Order(
             id = id,
-            version = version,
             location = location,
             volume = volume,
         ).apply {

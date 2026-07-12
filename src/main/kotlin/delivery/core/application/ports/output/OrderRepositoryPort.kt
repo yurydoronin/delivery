@@ -7,6 +7,6 @@ interface OrderRepositoryPort {
 
     fun track(order: Order)
     fun get(orderId: UUID): Order?
-    fun findAnyCreatedForUpdate(): Order?
-    fun findAllAssignedForUpdate(): List<Order>
+    fun findAnyCreated(): Order?
+    fun findAllAssigned(): List<Order>
 }

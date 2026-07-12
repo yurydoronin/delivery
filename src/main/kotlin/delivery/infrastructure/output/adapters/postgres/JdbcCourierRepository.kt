@@ -15,7 +15,6 @@ import org.springframework.stereotype.Repository
 private const val COURIERS_WITH_STORAGE_PLACES = """
     SELECT
         c.id,
-        c.version,
         c.name,
         c.speed,
         c.location_x,
@@ -50,7 +49,7 @@ class JdbcCourierRepository(
             .query(ResultSetExtractor(::mapCouriers))
             .firstOrNull()
 
-    override fun findCouriersWithAnyFreeStorageForUpdate(): List<Courier> =
+    override fun findCouriersWithAnyFreeStorage(): List<Courier> =
         jdbcClient.sql(
             """
             $COURIERS_WITH_STORAGE_PLACES
@@ -60,55 +59,51 @@ class JdbcCourierRepository(
                 WHERE free_sp.courier_id = c.id
                     AND free_sp.order_id IS NULL
             )
-            FOR UPDATE -- Ждем, пока освободится лучший курьер, а не берем свободного (худшего)
             """.trimIndent()
         )
             .query(ResultSetExtractor(::mapCouriers))
 
-    override fun getAllCouriersForUpdate(): List<Courier> =
+    override fun getCouriersWithAssignedOrders(): List<Courier> =
         jdbcClient.sql(
             """
             $COURIERS_WITH_STORAGE_PLACES
-            ORDER BY c.id
-            FOR UPDATE
+            WHERE EXISTS (
+                SELECT 1
+                FROM orders o
+                WHERE o.courier_id = c.id
+                    AND o.status = 'ASSIGNED'
+            )
             """.trimIndent()
         )
             .query(ResultSetExtractor(::mapCouriers))
 
     internal fun save(courier: Courier) {
-        if (courier.version == 0L) {
-            insert(courier)
-            // После INSERT в базу улетела version = 1.
-            // Значит, объект в памяти тоже должен стать version = 1.
-            courier.incrementVersion()
-        } else {
-            update(courier)
-            // После UPDATE в базе версия стала version + 1.
-            // Синхронизируем объект в памяти.
-            courier.incrementVersion()
-        }
-    }
-
-    private fun insert(courier: Courier) {
-        // Так как это INSERT, мы точно знаем, что начальная версия должна стать 1.
-        // Мы можем передать это значение явно, основываясь на courier.version (0 + 1)
-        val initialVersion = courier.version + 1
-
+        // 1. Атомарный UPSERT курьера
         jdbcClient.sql(
             """
-            INSERT INTO couriers (id, version, name, speed, location_x, location_y)
-            VALUES (:id, :version, :name, :speed, :locationX, :locationY)
+            INSERT INTO couriers (id, name, speed, location_x, location_y)
+            VALUES (:id, :name, :speed, :locationX, :locationY)
+            ON CONFLICT (id) 
+            DO UPDATE SET 
+                name = EXCLUDED.name,
+                speed = EXCLUDED.speed,
+                location_x = EXCLUDED.location_x,
+                location_y = EXCLUDED.location_y
             """.trimIndent()
         )
             .param("id", courier.id)
-            .param("version", initialVersion) // Передаем честную 1, вычисленную в Kotlin коде
             .param("name", courier.name)
             .param("speed", courier.speed)
             .param("locationX", courier.location.x)
             .param("locationY", courier.location.y)
             .update()
 
-        // 2. Вставляем слоты хранения курьера
+        // 2. Обновление мест хранения
+        // Чтобы не возиться с UPSERT для каждого слота, проще перетереть их в рамках одной транзакции Unit of Work
+        jdbcClient.sql("DELETE FROM storage_places WHERE courier_id = :courierId")
+            .param("courierId", courier.id)
+            .update()
+
         courier.storagePlaces.forEach { storagePlace ->
             jdbcClient.sql(
                 """
@@ -125,61 +120,6 @@ class JdbcCourierRepository(
         }
     }
 
-    private fun update(courier: Courier) {
-        // 1. Обновляем корень агрегата с проверкой оптимистичной блокировки
-        val updated = jdbcClient.sql(
-            """
-            -- неявно блокирует существующую строку на время записи + оптимистично проверяет, не устарели ли наши данные в памяти по мы пытались обновиться, 
-            -- предотвращение состояния гонки по принципу «Check-Then-Act».
-            UPDATE couriers -- в самом SQL-запросе UPDATE пессимистическая блокировка происходит автоматически на уровне движка базы данных 
-            SET
-                version = version + 1,
-                name = :name,
-                speed = :speed,
-                location_x = :locationX,
-                location_y = :locationY
-            WHERE id = :id
-                AND version = :version
-            """.trimIndent()
-        )
-            .param("id", courier.id)
-            .param("version", courier.version)
-            .param("name", courier.name)
-            .param("speed", courier.speed)
-            .param("locationX", courier.location.x)
-            .param("locationY", courier.location.y)
-            .update()
-
-        check(updated == 1) {
-            "Optimistic lock failed for courier ${courier.id}"
-        }
-
-        // 2. Обновляем дочерние сущности
-        courier.storagePlaces.forEach { storagePlace ->
-            val updatedStoragePlace = jdbcClient.sql(
-                """
-                UPDATE storage_places
-                SET
-                    name = :name,
-                    total_volume = :totalVolume,
-                    order_id = :orderId
-                WHERE id = :id
-                    AND courier_id = :courierId
-                """.trimIndent()
-            )
-                .param("id", storagePlace.id)
-                .param("name", storagePlace.name.name)
-                .param("totalVolume", storagePlace.totalVolume)
-                .param("orderId", storagePlace.orderId)
-                .param("courierId", courier.id)
-                .update()
-
-            check(updatedStoragePlace == 1) {
-                "Storage place ${storagePlace.id} not updated"
-            }
-        }
-    }
-
     private fun mapCouriers(rs: ResultSet): List<Courier> {
         val couriers = linkedMapOf<UUID, Courier>()
 
@@ -189,7 +129,6 @@ class JdbcCourierRepository(
             val courier = couriers.getOrPut(courierId) {
                 Courier.restore(
                     id = courierId,
-                    version = rs.getLong("version"),
                     name = rs.getString("name"),
                     speed = rs.getInt("speed"),
                     location = Location.restore(
