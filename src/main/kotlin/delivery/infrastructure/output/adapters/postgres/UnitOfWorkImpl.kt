@@ -7,6 +7,7 @@ import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxMessage
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxRepository
+import delivery.infrastructure.output.adapters.postgres.outbox.toIntegrationEventPayload
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
@@ -42,7 +43,7 @@ class UnitOfWorkImpl(
                                 eventType = domainEvent.javaClass.name,
                                 aggregateId = aggregate.id,
                                 aggregateType = aggregate.javaClass.simpleName,
-                                payload = objectMapper.writeValueAsString(domainEvent),
+                                payload = objectMapper.writeValueAsString(domainEvent.toIntegrationEventPayload()),
                                 occurredOnUtc = domainEvent.occurredOnUtc,
                             )
                         )

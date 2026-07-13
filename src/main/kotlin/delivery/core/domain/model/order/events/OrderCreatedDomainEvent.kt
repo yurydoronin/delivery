@@ -5,4 +5,4 @@ import java.util.UUID
 
 data class OrderCreatedDomainEvent(
     val orderId: UUID
-) : DomainEvent(source = orderId)
+) : DomainEvent()
