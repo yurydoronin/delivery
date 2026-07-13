@@ -2,7 +2,6 @@ package delivery.infrastructure.output.adapters.postgres
 
 import arrow.core.raise.either
 import com.ninjasquad.springmockk.MockkBean
-import delivery.DomainEventPublisher
 import delivery.core.application.ports.output.AggregateTracker
 import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.kernel.Location
@@ -27,9 +26,6 @@ class JdbcOrderRepositoryTest @Autowired constructor(
 
     @MockkBean(relaxed = true)
     lateinit var aggregateTracker: AggregateTracker
-
-    @MockkBean(relaxed = true)
-    lateinit var publisher: DomainEventPublisher
 
     @Test
     fun `add new order`() {
