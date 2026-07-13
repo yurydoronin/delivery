@@ -30,7 +30,7 @@ data class Location private constructor(
     }
 
     /**
-     * Расстояние между двумя точками (x1, y1) и (x2, y2) — это сумма разностей по каждой оси.
+     * Манхэттенское расстояние: расстояние между двумя точками (x1, y1) и (x2, y2) — это сумма разностей по каждой оси.
      */
     fun distanceTo(target: Location) = abs(target.x - x) + abs(target.y - y)
 

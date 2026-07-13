@@ -11,6 +11,8 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=12345
+    # Обязательно нужно включить wal_level=logical иначе debezium не сможет работать
+    command: ["-c", "wal_level=logical", "-c", "max_replication_slots=10", "-c", "max_wal_senders=10"]
 
   flyway:
     image: delivery_migrations:latest

@@ -41,4 +41,4 @@ app:
       port: ${GEO_SERVICE_GRPC_PORT:5004}
   kafka:
     basket-events-topic: ${KAFKA_BASKETS_EVENTS_TOPIC:baskets.events}
-    orders-events-topic: ${KAFKA_ORDERS_EVENTS_TOPIC:orders.events}
+    orders-events-topic: ${KAFKA_ORDERS_EVENTS_TOPIC:order.events}

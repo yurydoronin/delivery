@@ -22,7 +22,9 @@
 - Postgres
 - Flyway
 - Docker
+- Debezium
 
 #### Дополнительные решения
 - Unit of Work паттерн
 - Command-query separation (CQS) 
+- Реализован паттерн Outbox для гарантии отправки событий (at least once) в Kafka, при помощи Debezium (CDC)
