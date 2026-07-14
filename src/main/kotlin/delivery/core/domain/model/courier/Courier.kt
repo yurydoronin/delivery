@@ -66,7 +66,7 @@ class Courier private constructor(
         )
     }
 
-    internal fun restoreStoragePlace(storagePlace: StoragePlace) {
+    fun restoreStoragePlace(storagePlace: StoragePlace) {
         _storagePlaces.add(storagePlace)
     }
 
@@ -90,7 +90,7 @@ class Courier private constructor(
             place.store(order.id, order.volume)
         }
 
-    fun completeOrder(order: Order): Either<CourierError, Unit> = either {
+    fun delivered(order: Order): Either<CourierError, Unit> = either {
         val storagePlace = _storagePlaces
             .firstOrNull { it.orderId == order.id }
             ?: raise(CourierError.OrderNotFound)

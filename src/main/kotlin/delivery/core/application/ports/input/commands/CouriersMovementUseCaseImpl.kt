@@ -38,7 +38,7 @@ class CouriersMovementUseCaseImpl(
 
             if (courier.location == order.location) {
                 order.complete()
-                courier.completeOrder(order)
+                courier.delivered(order)
             }
 
             courierRepository.track(courier)

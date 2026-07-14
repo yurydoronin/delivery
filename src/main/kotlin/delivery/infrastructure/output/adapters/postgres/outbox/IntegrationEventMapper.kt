@@ -1,40 +1,29 @@
 package delivery.infrastructure.output.adapters.postgres.outbox
 
+import com.google.protobuf.MessageOrBuilder
 import common.types.base.DomainEvent
+import delivery.core.domain.model.order.events.OrderAssignedDomainEvent
 import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
-import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
-import java.time.Instant
-import java.util.UUID
+import queues.order.events.OrderEventsProto
 
-data class OrderCreatedOutboxPayload(
-    val eventId: UUID,
-    val orderId: UUID,
-    val occurredAt: Instant
-)
-
-data class OrderCompletedOutboxPayload(
-    val eventId: UUID,
-    val orderId: UUID,
-    val courierId: UUID,
-    val occurredAt: Instant
-)
-
-internal fun DomainEvent.toIntegrationEventPayload(): Any =
+internal fun DomainEvent.isIntegrationEvent(): Boolean =
     when (this) {
-        is OrderCreatedDomainEvent ->
-            OrderCreatedOutboxPayload(
-                eventId = eventId,
-                orderId = orderId,
-                occurredAt = occurredOnUtc
-            )
+        is OrderAssignedDomainEvent -> true
+        is OrderCompletedDomainEvent -> true
+        else -> false
+    }
+
+internal fun DomainEvent.toIntegrationEventPayload(): MessageOrBuilder =
+    when (this) {
+        is OrderAssignedDomainEvent ->
+            OrderEventsProto.OrderAssignedIntegrationEvent.newBuilder()
+                .setOrderId(orderId.toString())
+                .build()
 
         is OrderCompletedDomainEvent ->
-            OrderCompletedOutboxPayload(
-                eventId = eventId,
-                orderId = orderId,
-                courierId = courierId,
-                occurredAt = occurredOnUtc
-            )
+            OrderEventsProto.OrderCompletedIntegrationEvent.newBuilder()
+                .setOrderId(orderId.toString())
+                .build()
 
         else -> error("Unsupported domain event: ${this::class.simpleName}")
     }

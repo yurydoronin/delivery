@@ -124,7 +124,7 @@ class CourierTest {
             courier.takeOrder(order)
 
             // Act
-            val result = courier.completeOrder(order)
+            val result = courier.delivered(order)
 
             // Assert
             result.shouldBeRight()
@@ -140,7 +140,7 @@ class CourierTest {
             val order = Order.of(UUID.randomUUID(), Location.of(1, 1), 5)
 
             // Act
-            val result = courier.completeOrder(order)
+            val result = courier.delivered(order)
 
             // Assert
             val error = result.shouldBeLeft()

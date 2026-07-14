@@ -1,12 +1,13 @@
 package delivery.infrastructure.output.adapters.postgres
 
-import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.protobuf.util.JsonFormat
 import delivery.core.application.ports.output.AggregateTracker
 import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxMessage
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxRepository
+import delivery.infrastructure.output.adapters.postgres.outbox.isIntegrationEvent
 import delivery.infrastructure.output.adapters.postgres.outbox.toIntegrationEventPayload
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
@@ -21,10 +22,10 @@ class UnitOfWorkImpl(
     private val jdbcCourierRepository: JdbcCourierRepository,
     private val jdbcOrderRepository: JdbcOrderRepository,
     private val outboxRepository: OutboxRepository,
-    private val objectMapper: ObjectMapper,
 ) : UnitOfWork {
 
     private val log = LoggerFactory.getLogger(UnitOfWorkImpl::class.java)
+    private val printer = JsonFormat.printer().alwaysPrintFieldsWithNoPresence().omittingInsignificantWhitespace()
 
     @Transactional
     override fun commit() {
@@ -35,22 +36,24 @@ class UnitOfWorkImpl(
                     is Order -> jdbcOrderRepository.save(aggregate)
                 }
                 // Сохраняем события в Outbox
-                aggregate.allDomainEvents().forEach { domainEvent ->
-                    runCatching {
-                        outboxRepository.save(
-                            OutboxMessage(
-                                id = domainEvent.eventId,
-                                eventType = domainEvent.javaClass.name,
-                                aggregateId = aggregate.id,
-                                aggregateType = aggregate.javaClass.simpleName,
-                                payload = objectMapper.writeValueAsString(domainEvent.toIntegrationEventPayload()),
-                                occurredOnUtc = domainEvent.occurredOnUtc,
+                aggregate.allDomainEvents()
+                    .filter { it.isIntegrationEvent() }
+                    .forEach { domainEvent ->
+                        runCatching {
+                            outboxRepository.save(
+                                OutboxMessage(
+                                    id = domainEvent.eventId,
+                                    eventType = domainEvent.javaClass.name,
+                                    aggregateId = aggregate.id,
+                                    aggregateType = aggregate.javaClass.simpleName,
+                                    payload = printer.print(domainEvent.toIntegrationEventPayload()),
+                                    occurredOnUtc = domainEvent.occurredOnUtc,
+                                )
                             )
-                        )
-                    }.onFailure { e ->
-                        log.error("Failed to serialize domain event for outbox", e)
+                        }.onFailure { e ->
+                            log.error("Failed to serialize domain event for outbox", e)
+                        }
                     }
-                }
                 aggregate.clearDomainEvents()
             }
         } catch (e: Exception) {

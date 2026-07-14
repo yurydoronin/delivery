@@ -2,6 +2,7 @@ package delivery.core.domain.model.order
 
 import common.types.base.Aggregate
 import delivery.core.domain.kernel.Location
+import delivery.core.domain.model.order.events.OrderAssignedDomainEvent
 import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 import delivery.core.domain.model.order.events.OrderCreatedDomainEvent
 import java.util.UUID
@@ -61,6 +62,8 @@ class Order private constructor(
         require(_status == OrderStatus.CREATED) { "Only orders in CREATED status can be assigned" }
         _courierId = courierId
         _status = OrderStatus.ASSIGNED
+
+        addDomainEvent(OrderAssignedDomainEvent(orderId = id, courierId))
     }
 
     fun complete() {
