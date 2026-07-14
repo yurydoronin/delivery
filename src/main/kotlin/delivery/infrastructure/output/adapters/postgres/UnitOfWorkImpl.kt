@@ -7,6 +7,7 @@ import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxMessage
 import delivery.infrastructure.output.adapters.postgres.outbox.OutboxRepository
+import delivery.infrastructure.output.adapters.postgres.outbox.integrationEventType
 import delivery.infrastructure.output.adapters.postgres.outbox.isIntegrationEvent
 import delivery.infrastructure.output.adapters.postgres.outbox.toIntegrationEventPayload
 import org.slf4j.LoggerFactory
@@ -43,7 +44,7 @@ class UnitOfWorkImpl(
                             outboxRepository.save(
                                 OutboxMessage(
                                     id = domainEvent.eventId,
-                                    eventType = domainEvent.javaClass.name,
+                                    eventType = domainEvent.integrationEventType(),
                                     aggregateId = aggregate.id,
                                     aggregateType = aggregate.javaClass.simpleName,
                                     payload = printer.print(domainEvent.toIntegrationEventPayload()),

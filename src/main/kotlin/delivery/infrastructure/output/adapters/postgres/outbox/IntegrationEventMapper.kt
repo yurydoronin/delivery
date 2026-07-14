@@ -6,6 +6,14 @@ import delivery.core.domain.model.order.events.OrderAssignedDomainEvent
 import delivery.core.domain.model.order.events.OrderCompletedDomainEvent
 import queues.order.events.OrderEventsProto
 
+internal fun DomainEvent.integrationEventType(): String =
+    when (this) {
+        is OrderAssignedDomainEvent -> "OrderAssignedIntegrationEvent"
+        is OrderCompletedDomainEvent -> "OrderCompletedIntegrationEvent"
+
+        else -> error("Unsupported integration event: ${this::class.simpleName}")
+    }
+
 internal fun DomainEvent.isIntegrationEvent(): Boolean =
     when (this) {
         is OrderAssignedDomainEvent -> true
