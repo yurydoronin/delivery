@@ -7,6 +7,7 @@ import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.services.OrderDispatcher
+import java.util.UUID
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -19,8 +20,8 @@ class AssignOrderUseCaseImpl(
 ) : AssignOrderUseCase {
 
     @Transactional
-    override fun execute(): Either<BusinessError, Unit> = either {
-        val order = orderRepository.findAnyCreated()
+    override fun execute(orderId: UUID): Either<BusinessError, Unit> = either {
+        val order = orderRepository.findById(orderId)
             ?: raise(OrderAssignmentError.OrderNotFound)
 
         val couriers = courierRepository.findCouriersWithAnyFreeStorage()

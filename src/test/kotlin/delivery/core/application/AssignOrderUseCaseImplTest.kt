@@ -3,8 +3,8 @@ package delivery.core.application
 import arrow.core.left
 import arrow.core.raise.either
 import arrow.core.right
-import delivery.core.application.ports.input.commands.OrderAssignmentError
 import delivery.core.application.ports.input.commands.AssignOrderUseCaseImpl
+import delivery.core.application.ports.input.commands.OrderAssignmentError
 import delivery.core.application.ports.output.CourierRepositoryPort
 import delivery.core.application.ports.output.OrderRepositoryPort
 import delivery.core.application.ports.output.UnitOfWork
@@ -44,12 +44,12 @@ class AssignOrderUseCaseImplTest {
             val courier2 = Courier.of("Коля", 1, Location.of(2, 2)).bind()
             val couriers = listOf(courier1, courier2)
 
-            every { orderRepository.findAnyCreated() } returns order
+            every { orderRepository.findById(order.id) } returns order
             every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
             every { orderDispatcher.dispatch(order, couriers) } returns courier1.right()
 
             // Act
-            val result = sut.execute()
+            val result = sut.execute(order.id)
 
             // Assert
             result.shouldBeRight()
@@ -60,10 +60,12 @@ class AssignOrderUseCaseImplTest {
     @Test
     fun `fails to assign when no orders`() {
         // Arrange
-        every { orderRepository.findAnyCreated() } returns null
+        val orderId = UUID.randomUUID()
+
+        every { orderRepository.findById(orderId) } returns null
 
         // Act
-        val result = sut.execute()
+        val result = sut.execute(orderId)
 
         // Assert
         result shouldBe OrderAssignmentError.OrderNotFound.left()
@@ -75,12 +77,12 @@ class AssignOrderUseCaseImplTest {
         val order = Order.of(UUID.randomUUID(), Location.of(3, 3), 1)
         val couriers = emptyList<Courier>()
 
-        every { orderRepository.findAnyCreated() } returns order
+        every { orderRepository.findById(order.id) } returns order
         every { courierRepository.findCouriersWithAnyFreeStorage() } returns couriers
         every { orderDispatcher.dispatch(order, couriers) } returns DispatchError.NoAvailableCourier.left()
 
         // Act
-        val result = sut.execute()
+        val result = sut.execute(order.id)
 
         // Assert
         result shouldBe DispatchError.NoAvailableCourier.left()

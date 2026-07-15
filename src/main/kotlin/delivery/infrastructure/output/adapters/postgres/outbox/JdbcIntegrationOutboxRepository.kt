@@ -1,17 +1,19 @@
 package delivery.infrastructure.output.adapters.postgres.outbox
 
+import delivery.core.application.ports.output.IntegrationOutboxPort
 import java.sql.Timestamp
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Repository
 
 @Repository
-class OutboxRepository(
+class JdbcIntegrationOutboxRepository(
     private val jdbcClient: JdbcClient
-) {
-    internal fun save(message: OutboxMessage) {
+) : IntegrationOutboxPort {
+
+    override fun save(message: OutboxMessage) {
         jdbcClient.sql(
             """
-            INSERT INTO outbox (
+            INSERT INTO outbox_integration (
                 id, 
                 event_type, 
                 aggregate_id, 

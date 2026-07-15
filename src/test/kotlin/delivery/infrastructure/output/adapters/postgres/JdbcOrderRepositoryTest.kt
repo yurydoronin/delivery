@@ -38,7 +38,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         unitOfWork.commit()
 
         // Assert
-        val newOrder = jdbcOrderRepository.get(order.id)
+        val newOrder = jdbcOrderRepository.findById(order.id)
         newOrder shouldNotBe null
         newOrder!!.volume shouldBe 3
         verify { aggregateTracker.track(order) }
@@ -61,7 +61,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
             unitOfWork.commit()
 
             // Assert
-            val updatedOrder = jdbcOrderRepository.get(order.id)
+            val updatedOrder = jdbcOrderRepository.findById(order.id)
             updatedOrder shouldNotBe null
             updatedOrder!!.status shouldBe OrderStatus.ASSIGNED
             updatedOrder.courierId shouldBe courier.id
@@ -78,7 +78,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         unitOfWork.commit()
 
         // Act
-        val found = jdbcOrderRepository.get(order.id)
+        val found = jdbcOrderRepository.findById(order.id)
 
         // Assert
         found shouldNotBe null
@@ -87,25 +87,25 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         verify { aggregateTracker.track(order) }
     }
 
-    @Test
-    fun `find any created order`() {
-        // Arrange
-        val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
-        val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
-        jdbcOrderRepository.track(order1)
-        jdbcOrderRepository.track(order2)
-        every { aggregateTracker.getTracked() } returns listOf(order1, order2)
-        unitOfWork.commit()
-
-        // Act
-        val createdOrder = jdbcOrderRepository.findAnyCreated()
-
-        // Assert
-        createdOrder shouldNotBe null
-        createdOrder!!.status shouldBe OrderStatus.CREATED
-        verify { aggregateTracker.track(order1) }
-        verify { aggregateTracker.track(order2) }
-    }
+//    @Test
+//    fun `find any created order`() {
+//        // Arrange
+//        val order1 = Order.of(UUID.randomUUID(), Location.of(1, 1), 1)
+//        val order2 = Order.of(UUID.randomUUID(), Location.of(2, 2), 2)
+//        jdbcOrderRepository.track(order1)
+//        jdbcOrderRepository.track(order2)
+//        every { aggregateTracker.getTracked() } returns listOf(order1, order2)
+//        unitOfWork.commit()
+//
+//        // Act
+//        val createdOrder = jdbcOrderRepository.findAnyCreated()
+//
+//        // Assert
+//        createdOrder shouldNotBe null
+//        createdOrder!!.status shouldBe OrderStatus.CREATED
+//        verify { aggregateTracker.track(order1) }
+//        verify { aggregateTracker.track(order2) }
+//    }
 
     @Test
     fun `find all assigned orders`() {

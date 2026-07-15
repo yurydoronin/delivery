@@ -20,7 +20,7 @@ class JdbcOrderRepository(
         aggregateTracker.track(order)
     }
 
-    override fun get(orderId: UUID): Order? =
+    override fun findById(orderId: UUID): Order? =
         jdbcClient.sql(
             """
             SELECT *
@@ -29,20 +29,6 @@ class JdbcOrderRepository(
             """.trimIndent()
         )
             .param("id", orderId)
-            .query(::toDomain)
-            .optional()
-            .orElse(null)
-
-    override fun findAnyCreated(): Order? =
-        jdbcClient.sql(
-            """
-            SELECT *
-            FROM orders
-            WHERE status = :status
-            LIMIT 1
-            """.trimIndent()
-        )
-            .param("status", OrderStatus.CREATED.name)
             .query(::toDomain)
             .optional()
             .orElse(null)
