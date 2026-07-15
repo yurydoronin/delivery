@@ -8,7 +8,10 @@ import delivery.core.application.ports.output.IntegrationOutboxPort
 import delivery.core.application.ports.output.UnitOfWork
 import delivery.core.domain.model.courier.Courier
 import delivery.core.domain.model.order.Order
-import delivery.infrastructure.output.adapters.postgres.outbox.*
+import delivery.infrastructure.output.adapters.postgres.outbox.OutboxMessage
+import delivery.infrastructure.output.adapters.postgres.outbox.integrationEventType
+import delivery.infrastructure.output.adapters.postgres.outbox.isIntegrationEvent
+import delivery.infrastructure.output.adapters.postgres.outbox.toIntegrationEventPayload
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
@@ -40,33 +43,28 @@ class UnitOfWorkImpl(
                 // Сохраняем события в domainEventOutbox и integrationEventOutbox
                 aggregate.allDomainEvents()
                     .forEach { domainEvent ->
-                        runCatching {
-                            domainEventOutbox.save(
+                        domainEventOutbox.save(
+                            OutboxMessage(
+                                id = domainEvent.eventId,
+                                eventType = domainEvent.javaClass.name,
+                                aggregateId = aggregate.id,
+                                aggregateType = aggregate.javaClass.simpleName,
+                                payload = objectMapper.writeValueAsString(domainEvent),
+                                occurredOnUtc = domainEvent.occurredOnUtc
+                            )
+                        )
+
+                        if (domainEvent.isIntegrationEvent()) {
+                            integrationEventOutbox.save(
                                 OutboxMessage(
                                     id = domainEvent.eventId,
-                                    eventType = domainEvent.javaClass.name,
+                                    eventType = domainEvent.integrationEventType(),
                                     aggregateId = aggregate.id,
                                     aggregateType = aggregate.javaClass.simpleName,
-                                    payload = objectMapper.writeValueAsString(domainEvent),
-                                    occurredOnUtc = domainEvent.occurredOnUtc
+                                    payload = printer.print(domainEvent.toIntegrationEventPayload()),
+                                    occurredOnUtc = domainEvent.occurredOnUtc,
                                 )
                             )
-
-                            if(domainEvent.isIntegrationEvent()) {
-                                integrationEventOutbox.save(
-                                    OutboxMessage(
-                                        id = domainEvent.eventId,
-                                        eventType = domainEvent.integrationEventType(),
-                                        aggregateId = aggregate.id,
-                                        aggregateType = aggregate.javaClass.simpleName,
-                                        payload = printer.print(domainEvent.toIntegrationEventPayload()),
-                                        occurredOnUtc = domainEvent.occurredOnUtc,
-                                    )
-                                )
-                            }
-                        }.onFailure { e ->
-                            log.error("Failed to serialize event for outbox", e)
-                            throw e
                         }
                     }
                 aggregate.clearDomainEvents()

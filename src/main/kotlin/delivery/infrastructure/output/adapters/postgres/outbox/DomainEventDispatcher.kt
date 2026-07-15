@@ -33,8 +33,7 @@ class DomainEventDispatcher(
                     repository.markProcessed(outboxMessage)
                 }.onFailure { e ->
                     log.error("Failed to publish outbox message", e)
-                    throw e // иначе транзакция не откатится
-                }
+                }.getOrThrow() // пробрасываем исключение, чтобы выполнился rollback транзакции
             } ?: log.debug("No unprocessed outbox messages")
     }
 }
