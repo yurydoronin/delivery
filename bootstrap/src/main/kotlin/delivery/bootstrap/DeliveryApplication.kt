@@ -11,9 +11,9 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @SpringBootApplication(
     scanBasePackages = [
         "delivery.api",
-        "delivery.domain",
         "delivery.application",
         "delivery.infrastructure",
+        "delivery.bootstrap",
     ]
 )
 @ConfigurationPropertiesScan
