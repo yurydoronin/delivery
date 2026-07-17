@@ -1,7 +1,0 @@
-spring:
-  flyway:
-    enabled: true
-
-logging:
-  level:
-    org.flywaydb: DEBUG
