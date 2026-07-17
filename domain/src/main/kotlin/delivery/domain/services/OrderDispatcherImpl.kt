@@ -8,9 +8,6 @@ import delivery.domain.model.courier.Courier
 import delivery.domain.model.order.Order
 import delivery.domain.model.order.OrderStatus
 
-import org.springframework.stereotype.Service
-
-@Service
 class OrderDispatcherImpl : OrderDispatcher {
 
     override fun dispatch(order: Order, couriers: List<Courier>): Either<DispatchError, Courier> = either {
