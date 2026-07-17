@@ -2,7 +2,6 @@ package delivery.api
 
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
-import delivery.ApplicationTestConfig
 import delivery.api.input.adapters.http.CreateOrderController
 import delivery.api.input.adapters.http.OrderCreationRequest
 import delivery.api.input.adapters.http.toCommand
@@ -23,7 +22,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 import tools.jackson.databind.ObjectMapper
 
-@WebMvcTest(CreateOrderController::class, ApplicationTestConfig::class)
+@WebMvcTest(CreateOrderController::class)
 class CreateOrderControllerContractTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val objectMapper: ObjectMapper
