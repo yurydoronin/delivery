@@ -9,7 +9,6 @@ dependencies {
     implementation(project(":api"))
     implementation(project(":application"))
     implementation(project(":domain"))
-    implementation(project(":common:types"))
     implementation(project(":infrastructure"))
 
     implementation(libs.spring.boot.starter)

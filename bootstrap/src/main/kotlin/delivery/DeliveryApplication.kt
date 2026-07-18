@@ -1,5 +1,6 @@
 package delivery
 
+import delivery.domain.services.OrderDispatcher
 import delivery.domain.services.OrderDispatcherImpl
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan
@@ -21,5 +22,5 @@ fun main(args: Array<String>) {
 class DomainConfig {
 
     @Bean
-    fun orderDispatcher() = OrderDispatcherImpl()
+    fun orderDispatcher(): OrderDispatcher = OrderDispatcherImpl()
 }
