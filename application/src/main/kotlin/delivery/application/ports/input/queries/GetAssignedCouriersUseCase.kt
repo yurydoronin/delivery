@@ -1,8 +1,9 @@
 package delivery.application.ports.input.queries
 
 import arrow.core.Either
+import delivery.common.types.dto.LocationResult
 import delivery.common.types.error.BusinessError
-import delivery.domain.kernel.Location
+
 import java.util.UUID
 
 interface GetAssignedCouriersUseCase {
@@ -15,5 +16,5 @@ interface GetAssignedCouriersUseCase {
 data class GetAssignedCouriersResult(
     val courierId: UUID,
     val name: String,
-    val location: Location
+    val location: LocationResult
 )

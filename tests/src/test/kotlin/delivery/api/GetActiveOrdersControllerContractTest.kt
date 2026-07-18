@@ -8,7 +8,7 @@ import delivery.api.input.adapters.http.OrderLocationResponse
 import delivery.application.ports.input.queries.ActiveOrdersError
 import delivery.application.ports.input.queries.GetActiveOrdersResult
 import delivery.application.ports.input.queries.GetActiveOrdersUseCase
-import delivery.domain.kernel.Location
+import delivery.common.types.dto.LocationResult
 import io.mockk.every
 import java.util.UUID
 import kotlin.test.Test
@@ -32,7 +32,7 @@ class GetActiveOrdersControllerContractTest @Autowired constructor(
     @Test
     fun `get active orders`() {
         // Arrange
-        val result = GetActiveOrdersResult(UUID.randomUUID(), Location.of(1, 1))
+        val result = GetActiveOrdersResult(UUID.randomUUID(), LocationResult(1, 1))
 
         every { useCase.execute() } returns Either.Right(listOf(result))
 

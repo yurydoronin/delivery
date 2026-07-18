@@ -2,13 +2,13 @@ package delivery.api
 
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
+import delivery.api.input.adapters.http.AddressDto
 import delivery.api.input.adapters.http.CreateOrderController
 import delivery.api.input.adapters.http.OrderCreationRequest
 import delivery.api.input.adapters.http.toCommand
 import delivery.application.ports.input.commands.CreateOrderCommand
 import delivery.application.ports.input.commands.CreateOrderUseCase
 import delivery.application.ports.output.GeoServiceClientError
-import delivery.domain.model.order.Address
 import io.mockk.every
 import io.mockk.verify
 import java.util.UUID
@@ -34,7 +34,7 @@ class CreateOrderControllerContractTest @Autowired constructor(
     fun `create order`() {
         // Arrange
         val orderId = UUID.randomUUID()
-        val address = Address.of("Россия", "Москва", "Ленина", 1, 10)
+        val address = AddressDto("Россия", "Москва", "Ленина", "1", "10")
         val request = OrderCreationRequest(orderId, address, 5)
 
         every { useCase.execute(request.toCommand()) } returns Either.Right(Unit)
@@ -53,7 +53,7 @@ class CreateOrderControllerContractTest @Autowired constructor(
     @Test
     fun `fails to create order`() {
         // Arrange
-        val address = Address.of("Россия", "Москва", "Ленина", 1, 10)
+        val address = AddressDto("Россия", "Москва", "Ленина", "1", "10")
         val request = OrderCreationRequest(UUID.randomUUID(), address, 5)
 
         every { useCase.execute(request.toCommand()) } returns Either.Left(GeoServiceClientError.LocationNotFound)

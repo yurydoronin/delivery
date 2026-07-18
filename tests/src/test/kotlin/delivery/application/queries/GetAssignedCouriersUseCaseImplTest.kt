@@ -4,7 +4,7 @@ import arrow.core.left
 import delivery.BaseRepositoryTest
 import delivery.application.ports.input.queries.AssignedCouriersError
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCaseImpl
-import delivery.domain.kernel.Location
+import delivery.common.types.dto.LocationResult
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
 import java.util.UUID
@@ -75,7 +75,7 @@ class GetAssignedCouriersUseCaseImplTest @Autowired constructor(
         couriers.size shouldBe 1
         couriers.first().courierId shouldBe courier1Id
         couriers.first().name shouldBe "Маша"
-        couriers.first().location shouldBe Location.of(1, 1)
+        couriers.first().location shouldBe LocationResult(1, 1)
     }
 
     @Test

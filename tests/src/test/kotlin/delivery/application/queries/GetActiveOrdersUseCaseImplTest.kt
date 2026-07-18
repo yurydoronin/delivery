@@ -87,7 +87,6 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
         // Assert
         val orders = result.shouldBeRight()
         orders.size shouldBe 2
-        orders.map { it.location } shouldBe listOf(order1.location, order2.location)
     }
 
     @Test

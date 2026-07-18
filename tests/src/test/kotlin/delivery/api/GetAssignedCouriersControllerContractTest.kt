@@ -8,7 +8,7 @@ import delivery.api.input.adapters.http.GetAssignedCouriersResponse
 import delivery.application.ports.input.queries.AssignedCouriersError
 import delivery.application.ports.input.queries.GetAssignedCouriersResult
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCase
-import delivery.domain.kernel.Location
+import delivery.common.types.dto.LocationResult
 import io.mockk.every
 import java.util.UUID
 import kotlin.test.Test
@@ -33,7 +33,7 @@ class GetAssignedCouriersControllerContractTest @Autowired constructor(
     fun `get assigned couriers`() {
         // Arrange
         val courierId = UUID.randomUUID()
-        val result = GetAssignedCouriersResult(courierId, "Вася", Location.of(1, 1))
+        val result = GetAssignedCouriersResult(courierId, "Вася", LocationResult(1, 1))
 
         every { useCase.execute() } returns Either.Right(listOf(result))
 

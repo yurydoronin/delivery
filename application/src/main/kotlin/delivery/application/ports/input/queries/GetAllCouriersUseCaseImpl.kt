@@ -2,6 +2,7 @@ package delivery.application.ports.input.queries
 
 import arrow.core.Either
 import arrow.core.raise.either
+import delivery.common.types.dto.LocationResult
 import delivery.common.types.error.BusinessError
 import delivery.domain.kernel.Location
 import java.util.UUID
@@ -22,12 +23,17 @@ class GetAllCouriersUseCaseImpl(
         """.trimIndent()
 
         val results = jdbcTemplate.query(sql) { rs, _ ->
+            val domainLocation = Location.restore(
+                rs.getInt("location_x"),
+                rs.getInt("location_y")
+            )
+
             GetAllCouriersResult(
                 courierId = UUID.fromString(rs.getString("id")),
                 name = rs.getString("name"),
-                location = Location.of(
-                    rs.getInt("location_x"),
-                    rs.getInt("location_y")
+                location = LocationResult(
+                    x = domainLocation.x,
+                    y = domainLocation.y
                 )
             )
         }

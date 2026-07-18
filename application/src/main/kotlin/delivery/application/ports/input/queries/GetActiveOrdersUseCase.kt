@@ -1,8 +1,8 @@
 package delivery.application.ports.input.queries
 
 import arrow.core.Either
+import delivery.common.types.dto.LocationResult
 import delivery.common.types.error.BusinessError
-import delivery.domain.kernel.Location
 import java.util.UUID
 
 interface GetActiveOrdersUseCase {
@@ -14,5 +14,5 @@ interface GetActiveOrdersUseCase {
  */
 data class GetActiveOrdersResult(
     val orderId: UUID,
-    val location: Location
+    val location: LocationResult
 )

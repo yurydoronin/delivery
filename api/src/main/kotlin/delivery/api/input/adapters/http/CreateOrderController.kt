@@ -3,7 +3,6 @@ package delivery.api.input.adapters.http
 import com.fasterxml.jackson.annotation.JsonProperty
 import delivery.application.ports.input.commands.CreateOrderCommand
 import delivery.application.ports.input.commands.CreateOrderUseCase
-import delivery.domain.model.order.Address
 import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -35,8 +34,16 @@ class CreateOrderController(
 data class OrderCreationRequest(
     @JsonProperty("id")
     val orderId: UUID,
-    val address: Address,
+    val address: AddressDto,
     val volume: Int,
+)
+
+data class AddressDto(
+    val country: String,
+    val city: String,
+    val street: String,
+    val house: String,
+    val apartment: String
 )
 
 fun OrderCreationRequest.toCommand(): CreateOrderCommand =

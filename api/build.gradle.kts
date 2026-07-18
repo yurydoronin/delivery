@@ -8,7 +8,6 @@ plugins {
 
 dependencies {
     implementation(project(":application"))
-    implementation(project(":domain"))
     implementation(project(":common:types"))
 
     // Spring
