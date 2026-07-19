@@ -17,8 +17,6 @@ dependencies {
 
     implementation(libs.spring.kafka)
 
-    implementation(libs.kotlin.reflect)
-
     // Arrow.Either
     implementation(libs.arrow.core)
 

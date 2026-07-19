@@ -12,8 +12,6 @@ dependencies {
     // Arrow.Either
     implementation(libs.arrow.core)
 
-    implementation(libs.kotlin.reflect)
-
     implementation(libs.postgresql)
 
     // Flyway

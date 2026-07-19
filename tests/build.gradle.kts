@@ -1,9 +1,5 @@
-import org.springframework.boot.gradle.tasks.bundling.BootJar
-
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    alias(libs.plugins.spring.boot)
-    alias(libs.plugins.spring.dependency.management)
 }
 
 dependencies {
@@ -27,10 +23,6 @@ dependencies {
     testImplementation(libs.testcontainers.junit.jupiter)
     testImplementation(libs.testcontainers.postgresql)
     testImplementation(libs.springmockk)
-}
-
-tasks.named<BootJar>("bootJar") {
-    enabled = false
 }
 
 tasks.test {
