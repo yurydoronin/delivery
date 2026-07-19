@@ -7,7 +7,6 @@ plugins {
 }
 
 dependencies {
-    // Подключаем все модули приложения
     implementation(project(":api"))
     implementation(project(":application"))
     implementation(project(":bootstrap"))
@@ -19,7 +18,7 @@ dependencies {
     implementation(libs.spring.boot.starter.flyway)
     runtimeOnly(libs.flyway.database.postgresql)
 
-    testImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation(kotlin("test"))
     testImplementation(libs.mockk)
     testImplementation(libs.kotest.assertions.arrow)
     testImplementation(libs.spring.boot.starter.test)
