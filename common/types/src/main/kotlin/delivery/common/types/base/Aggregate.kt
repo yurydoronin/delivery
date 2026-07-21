@@ -6,7 +6,7 @@ abstract class Aggregate<ID : Any> protected constructor(
 
     private val _domainEvents: MutableList<DomainEvent> = mutableListOf()
 
-    override fun allDomainEvents(): List<DomainEvent> = _domainEvents
+    override fun allDomainEvents(): List<DomainEvent> = _domainEvents.toList()
 
     override fun addDomainEvent(event: DomainEvent) {
         _domainEvents.add(event)
