@@ -24,9 +24,8 @@ class Courier private constructor(
     var location: Location,
 ) : Aggregate<UUID>(id) {
 
-    private var _storagePlaces = mutableListOf<StoragePlace>()
-    val storagePlaces: List<StoragePlace>
-        get() = _storagePlaces.toList()
+    var storagePlaces = mutableListOf<StoragePlace>()
+        private set
 
     companion object {
         // Каждый курьер владеет местом хранения "Сумка" объемом 10 литров
@@ -67,15 +66,15 @@ class Courier private constructor(
     }
 
     fun restoreStoragePlace(storagePlace: StoragePlace) {
-        _storagePlaces.add(storagePlace)
+        this.storagePlaces.add(storagePlace)
     }
 
     fun addStoragePlace(name: StoragePlaceName, totalVolume: Int) {
-        _storagePlaces.add(StoragePlace.of(name, totalVolume))
+        this.storagePlaces.add(StoragePlace.of(name, totalVolume))
     }
 
     fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> =
-        _storagePlaces
+        this.storagePlaces
             .firstOrNull { it.canStore(order.volume) == StorageCheck.Ok }
             ?.right() ?: CourierError.NoAvailableStorage.left()
 
@@ -91,7 +90,7 @@ class Courier private constructor(
         }
 
     fun delivered(order: Order): Either<CourierError, Unit> = either {
-        val storagePlace = _storagePlaces
+        val storagePlace = storagePlaces
             .firstOrNull { it.orderId == order.id }
             ?: raise(CourierError.OrderNotFound)
 

@@ -20,9 +20,8 @@ class StoragePlace private constructor(
     val totalVolume: Int,
 ) : DomainEntity<UUID>(id) {
 
-    private var _orderId: UUID? = null
-    val orderId: UUID?
-        get() = _orderId
+    var orderId: UUID? = null
+        private set
 
     companion object {
         fun of(name: StoragePlaceName, totalVolume: Int): StoragePlace {
@@ -36,7 +35,7 @@ class StoragePlace private constructor(
             totalVolume: Int,
             orderId: UUID?,
         ) = StoragePlace(id, name, totalVolume).apply {
-            _orderId = orderId
+            this.orderId = orderId
         }
     }
 
@@ -58,7 +57,7 @@ class StoragePlace private constructor(
 
     fun store(orderId: UUID, orderVolume: Int): Either<StorageError, Unit> = either {
         when (canStore(orderVolume)) {
-            is StorageCheck.Ok -> _orderId = orderId
+            is StorageCheck.Ok -> this@StoragePlace.orderId = orderId
             is StorageCheck.Occupied -> raise(StorageError.Occupied)
             is StorageCheck.NotEnoughSpace -> raise(StorageError.NotEnoughSpace)
         }
@@ -68,8 +67,8 @@ class StoragePlace private constructor(
      * Извлечение заказа из места хранения
      */
     fun clear(): UUID? {
-        val extracted = _orderId
-        _orderId = null
+        val extracted = orderId
+        orderId = null
         return extracted
     }
 }

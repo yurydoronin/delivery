@@ -16,13 +16,11 @@ class Order private constructor(
     val volume: Int
 ) : Aggregate<UUID>(id) {
 
-    private var _status: OrderStatus = OrderStatus.CREATED
-    val status: OrderStatus
-        get() = _status
+    var status: OrderStatus = OrderStatus.CREATED
+        private set
 
-    private var _courierId: UUID? = null
-    val courierId: UUID?
-        get() = _courierId
+    var courierId: UUID? = null
+        private set
 
     companion object {
         fun of(
@@ -53,23 +51,23 @@ class Order private constructor(
             location = location,
             volume = volume,
         ).apply {
-            _status = status
-            _courierId = courierId
+            this.status = status
+            this.courierId = courierId
         }
     }
 
     fun assignToCourier(courierId: UUID) {
-        require(_status == OrderStatus.CREATED) { "Only orders in CREATED status can be assigned" }
-        _courierId = courierId
-        _status = OrderStatus.ASSIGNED
+        require(status == OrderStatus.CREATED) { "Only orders in CREATED status can be assigned" }
+        this.courierId = courierId
+        this.status = OrderStatus.ASSIGNED
 
         addDomainEvent(OrderAssignedDomainEvent(orderId = id, courierId))
     }
 
     fun complete() {
-        require(_status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
-        checkNotNull(_courierId) { "Cannot complete an order without an assigned courier" }
-        _status = OrderStatus.COMPLETED
+        require(status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
+        checkNotNull(courierId) { "Cannot complete an order without an assigned courier" }
+        this.status = OrderStatus.COMPLETED
 
         addDomainEvent(OrderCompletedDomainEvent(orderId = id, courierId!!))
     }

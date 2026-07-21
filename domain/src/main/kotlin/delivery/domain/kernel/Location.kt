@@ -22,11 +22,6 @@ data class Location private constructor(
         )
 
         fun restore(x: Int, y: Int) = Location(x = x, y = y)
-
-        fun random() = of(
-            x = (MIN..MAX).random(),
-            y = (MIN..MAX).random()
-        )
     }
 
     /**
@@ -34,9 +29,4 @@ data class Location private constructor(
      */
     fun distanceTo(target: Location) = abs(target.x - x) + abs(target.y - y)
 
-    /**
-     * Две координаты равны, если их X и Y равны
-     */
-    operator fun compareTo(other: Location): Int =
-        compareValuesBy(a = this, b = other, { it.x }, { it.y })
 }

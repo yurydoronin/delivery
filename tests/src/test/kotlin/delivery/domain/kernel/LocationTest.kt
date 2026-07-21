@@ -3,7 +3,6 @@ package delivery.domain.kernel
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 
@@ -38,17 +37,4 @@ class LocationTest {
 
         assertEquals(5, a.distanceTo(b))
     }
-
-    @Test
-    fun `compareTo respects x and y order`() {
-        val a = Location.of(1, 1)
-        val b = Location.of(2, 1)
-        val c = Location.of(2, 2)
-
-        assertTrue(a < b)
-        assertTrue(b < c)
-        assertTrue(c > a)
-        assertEquals(0, b.compareTo(Location.of(2, 1)))
-    }
-
 }

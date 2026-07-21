@@ -1,4 +1,5 @@
 # Сервис доставки
+[![Delivery CI](https://github.com/yurydoronin/delivery/actions/workflows/ci.yaml/badge.svg?branch=main)](https://github.com/yurydoronin/delivery/actions/workflows/ci.yaml)
 
 ### В рамках [курса Кирилла Ветчинкина (11.09.2025 - 23.10.2025)](https://microarch.ru/courses/ddd/languages/java) реализуется один из сервисов Интернет-магазина.
 
