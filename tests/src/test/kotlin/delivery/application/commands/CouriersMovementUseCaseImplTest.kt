@@ -5,6 +5,7 @@ import delivery.application.ports.input.commands.MovementError
 import delivery.application.ports.output.CourierRepositoryPort
 import delivery.application.ports.output.OrderRepositoryPort
 import delivery.application.ports.output.UnitOfWork
+import delivery.domain.kernel.Location
 import delivery.domain.kernel.LocationTestData
 import delivery.domain.model.courier.Courier
 import delivery.domain.model.order.Order
@@ -60,8 +61,8 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `move couriers`() {
         // Arrange
-        val courier1 = Courier.of("Маша", 4, LocationTestData.random()).shouldBeRight()
-        val order1 = Order.of(UUID.randomUUID(), LocationTestData.random(), 1).shouldBeRight()
+        val order1 = Order.of(UUID.randomUUID(), Location.restore(3, 3), 1).shouldBeRight()
+        val courier1 = Courier.of("Маша", 4, Location.restore(1,1)).shouldBeRight()
         order1.assignToCourier(courier1.id)
 
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier1)
