@@ -1,10 +1,10 @@
 package delivery.application.queries
 
-import arrow.core.left
 import delivery.BaseRepositoryTest
 import delivery.application.ports.input.queries.AssignedCouriersError
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCaseImpl
 import delivery.common.types.dto.LocationResult
+import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
 import java.util.UUID
@@ -67,21 +67,19 @@ class GetAssignedCouriersUseCaseImplTest @Autowired constructor(
         )
 
         // Act
-        val result = sut.execute()
+        val result = sut.execute().shouldBeRight()
 
         // Assert
-        val couriers = result.shouldBeRight()
-
-        couriers.size shouldBe 1
-        couriers.first().courierId shouldBe courier1Id
-        couriers.first().name shouldBe "Маша"
-        couriers.first().location shouldBe LocationResult(1, 1)
+        result.size shouldBe 1
+        result.first().courierId shouldBe courier1Id
+        result.first().name shouldBe "Маша"
+        result.first().location shouldBe LocationResult(1, 1)
     }
 
     @Test
     fun `fails when no assigned couriers`() {
-        val result = sut.execute()
+        val result = sut.execute().shouldBeLeft()
 
-        result shouldBe AssignedCouriersError.NoAssignedCouriers.left()
+        result shouldBe AssignedCouriersError.NoAssignedCouriers
     }
 }

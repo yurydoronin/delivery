@@ -8,7 +8,8 @@ import delivery.application.ports.output.GeoServiceClientError
 import delivery.application.ports.output.GeoServiceClientPort
 import delivery.application.ports.output.OrderRepositoryPort
 import delivery.application.ports.output.UnitOfWork
-import delivery.domain.kernel.Location
+import delivery.domain.kernel.LocationTestData
+import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
 import io.mockk.every
@@ -33,13 +34,12 @@ class CreateOrderUseCaseImplTest {
             volume = 10
         )
 
-        every { geoServiceClient.getLocation(command.street) } returns Location.of(1, 1).right()
+        every { geoServiceClient.getLocation(command.street) } returns LocationTestData.random().right()
 
         // Act
-        val result = sut.execute(command)
+        sut.execute(command).shouldBeRight()
 
         // Assert
-        result.shouldBeRight()
         verify { orderRepository.track(match { it.id == command.orderId && it.volume == command.volume }) }
         verify { unitOfWork.commit() }
     }
@@ -56,9 +56,9 @@ class CreateOrderUseCaseImplTest {
         every { geoServiceClient.getLocation(command.street) } returns GeoServiceClientError.LocationNotFound.left()
 
         // Act
-        val result = sut.execute(command)
+        val result = sut.execute(command).shouldBeLeft()
 
         // Assert
-        result shouldBe GeoServiceClientError.LocationNotFound.left()
+        result shouldBe GeoServiceClientError.LocationNotFound
     }
 }

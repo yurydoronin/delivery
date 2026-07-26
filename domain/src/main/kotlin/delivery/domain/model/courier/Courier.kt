@@ -2,13 +2,13 @@ package delivery.domain.model.courier
 
 import arrow.core.Either
 import arrow.core.flatMap
-import arrow.core.left
 import arrow.core.raise.either
-import arrow.core.right
+import arrow.core.raise.ensure
 import com.github.f4b6a3.uuid.UuidCreator
 import delivery.common.types.base.Aggregate
 import delivery.common.types.error.BusinessError
 import delivery.domain.kernel.Location
+import delivery.domain.kernel.LocationError
 import delivery.domain.model.order.Order
 import java.util.UUID
 import kotlin.math.abs
@@ -36,10 +36,10 @@ class Courier private constructor(
             speed: Int,
             location: Location,
             storageName: String = "Сумка"
-        ): Either<StorageError, Courier> =
+        ): Either<BusinessError, Courier> =
             either {
-                require(name.isNotBlank()) { "Name must not be blank" }
-                require(speed > 0) { "Speed must be positive" }
+                ensure(name.isNotBlank()) { CourierError.InvalidName }
+                ensure(speed > 0) { CourierError.InvalidSpeed }
 
                 val courier = Courier(
                     id = UuidCreator.getTimeOrderedEpoch(),
@@ -69,14 +69,17 @@ class Courier private constructor(
         this.storagePlaces.add(storagePlace)
     }
 
-    fun addStoragePlace(name: StoragePlaceName, totalVolume: Int) {
-        this.storagePlaces.add(StoragePlace.of(name, totalVolume))
+    fun addStoragePlace(name: StoragePlaceName, totalVolume: Int): Either<StorageError, Unit> = either {
+        storagePlaces.add(
+            StoragePlace.of(name, totalVolume).bind()
+        )
     }
 
-    fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> =
-        this.storagePlaces
+    fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> = either {
+        storagePlaces
             .firstOrNull { it.canStore(order.volume) == StorageCheck.Ok }
-            ?.right() ?: CourierError.NoAvailableStorage.left()
+            ?: raise(CourierError.NoAvailableStorage)
+    }
 
     /**
      * Курьер может взять заказ, если в одном из его мест хранения есть место.
@@ -108,7 +111,7 @@ class Courier private constructor(
     /**
      * Перемещает курьера к указанной точке `target` с учётом его скорости
      */
-    fun move(target: Location) {
+    fun move(target: Location): Either<LocationError, Unit> = either {
         val difX = target.x - location.x
         val difY = target.y - location.y
         var remainingSteps = speed
@@ -118,11 +121,13 @@ class Courier private constructor(
 
         val moveY = difY.coerceIn(-remainingSteps, remainingSteps)
 
-        location = Location.of(location.x + moveX, location.y + moveY)
+        location = Location.of(location.x + moveX, location.y + moveY).bind()
     }
 }
 
 sealed class CourierError(override val message: String) : BusinessError {
     data object NoAvailableStorage : CourierError("No available storage for this order")
     data object OrderNotFound : CourierError("Order not found in any storage")
+    data object InvalidName : CourierError("Name must not be blank")
+    data object InvalidSpeed : CourierError("Speed must be positive")
 }

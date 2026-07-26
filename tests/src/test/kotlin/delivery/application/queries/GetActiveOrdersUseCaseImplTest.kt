@@ -1,11 +1,11 @@
 package delivery.application.queries
 
-import arrow.core.left
 import delivery.BaseRepositoryTest
 import delivery.application.ports.input.queries.ActiveOrdersError
 import delivery.application.ports.input.queries.GetActiveOrdersUseCaseImpl
-import delivery.domain.kernel.Location
+import delivery.domain.kernel.LocationTestData
 import delivery.domain.model.order.Order
+import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
 import java.util.UUID
@@ -37,8 +37,8 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             courierId, "Маша", 4, 1, 1
         )
 
-        val order1 = Order.of(UUID.randomUUID(), Location.of(3, 3), 4)
-        val order2 = Order.of(UUID.randomUUID(), Location.of(4, 4), 7)
+        val order1 = Order.of(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
+        val order2 = Order.of(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
         order1.assignToCourier(courierId)
 
         jdbcTemplate.update(
@@ -82,17 +82,16 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
         )
 
         // Act
-        val result = sut.execute()
+        val result = sut.execute().shouldBeRight()
 
         // Assert
-        val orders = result.shouldBeRight()
-        orders.size shouldBe 2
+        result.size shouldBe 2
     }
 
     @Test
     fun `fails when no incomplete orders`() {
-        val result = sut.execute()
+        val result = sut.execute().shouldBeLeft()
 
-        result shouldBe ActiveOrdersError.NoActiveOrders.left()
+        result shouldBe ActiveOrdersError.NoActiveOrders
     }
 }

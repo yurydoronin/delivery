@@ -1,12 +1,11 @@
 package delivery.application.ports.input.commands
 
 import arrow.core.Either
-import delivery.application.ports.output.GeoServiceClientError
-
+import delivery.common.types.error.BusinessError
 import java.util.UUID
 
 interface CreateOrderUseCase {
-    fun execute(command: CreateOrderCommand): Either<GeoServiceClientError, Unit>
+    fun execute(command: CreateOrderCommand): Either<BusinessError, Unit>
 }
 
 /**

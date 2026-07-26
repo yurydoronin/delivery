@@ -2,6 +2,7 @@ package delivery.domain.model.courier
 
 import arrow.core.Either
 import arrow.core.raise.either
+import arrow.core.raise.ensure
 import com.github.f4b6a3.uuid.UuidCreator
 import delivery.common.types.base.DomainEntity
 import delivery.common.types.error.BusinessError
@@ -24,9 +25,11 @@ class StoragePlace private constructor(
         private set
 
     companion object {
-        fun of(name: StoragePlaceName, totalVolume: Int): StoragePlace {
-            require(totalVolume > 0) { "Total volume must be greater than 0" }
-            return StoragePlace(id = UuidCreator.getTimeOrderedEpoch(), name, totalVolume)
+        fun of(name: StoragePlaceName, totalVolume: Int): Either<StorageError, StoragePlace> = either {
+
+            ensure(totalVolume > 0) { StorageError.InvalidVolume }
+
+            StoragePlace(id = UuidCreator.getTimeOrderedEpoch(), name, totalVolume)
         }
 
         fun restore(
@@ -42,7 +45,7 @@ class StoragePlace private constructor(
     /**
      * Место хранения считается пустым, если OrderId не установлен.
      */
-    val isEmpty get() = orderId == null
+    private val isEmpty get() = orderId == null
 
     /**
      * Поместить заказ в место хранения можно только, если:
@@ -108,4 +111,5 @@ sealed class StorageError(override val message: String) : BusinessError {
     data object Occupied : StorageError("Storage is already occupied")
     data object NotEnoughSpace : StorageError("Order volume exceeds storage capacity")
     data class UnknownStoragePlace(val name: String) : StorageError("Unknown storage place: $name")
+    data object InvalidVolume : StorageError("Total volume must be positive")
 }

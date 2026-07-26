@@ -1,6 +1,10 @@
 package delivery.domain.model.order
 
+import arrow.core.Either
+import arrow.core.raise.either
+import arrow.core.raise.ensure
 import delivery.common.types.base.Aggregate
+import delivery.common.types.error.BusinessError
 import delivery.domain.kernel.Location
 import delivery.domain.model.order.events.OrderAssignedDomainEvent
 import delivery.domain.model.order.events.OrderCompletedDomainEvent
@@ -27,18 +31,22 @@ class Order private constructor(
             id: UUID,
             location: Location,
             volume: Int,
-        ): Order {
-            require(volume > 0) { "Volume must be positive" }
+        ): Either<OrderError, Order> = either {
 
-            return Order(
+            ensure(volume > 0) { OrderError.InvalidVolume }
+
+            Order(
                 id = id,
                 location = location,
                 volume = volume,
             )
                 .apply {
-                    addDomainEvent(OrderCreatedDomainEvent(orderId = id))
+                    addDomainEvent(
+                        OrderCreatedDomainEvent(orderId = id)
+                    )
                 }
         }
+
 
         fun restore(
             id: UUID,
@@ -56,20 +64,25 @@ class Order private constructor(
         }
     }
 
-    fun assignToCourier(courierId: UUID) {
-        require(status == OrderStatus.CREATED) { "Only orders in CREATED status can be assigned" }
-        this.courierId = courierId
-        this.status = OrderStatus.ASSIGNED
+    fun assignToCourier(courierId: UUID): Either<OrderError, Unit> = either {
+        ensure(status == OrderStatus.CREATED) { OrderError.InvalidStatusForAssignment }
 
-        addDomainEvent(OrderAssignedDomainEvent(orderId = id, courierId))
+        this@Order.courierId = courierId
+        status = OrderStatus.ASSIGNED
+
+        addDomainEvent(
+            OrderAssignedDomainEvent(orderId = id, courierId)
+        )
     }
 
-    fun complete() {
-        require(status == OrderStatus.ASSIGNED) { "Only assigned orders can be completed" }
-        checkNotNull(courierId) { "Cannot complete an order without an assigned courier" }
-        this.status = OrderStatus.COMPLETED
+    fun complete(): Either<OrderError, Unit> = either {
+        ensure(status == OrderStatus.ASSIGNED) { OrderError.InvalidStatusForCompletion }
+        val courierId = courierId
+            ?: raise(OrderError.CourierNotAssigned)
 
-        addDomainEvent(OrderCompletedDomainEvent(orderId = id, courierId!!))
+        status = OrderStatus.COMPLETED
+
+        addDomainEvent(OrderCompletedDomainEvent(orderId = id, courierId))
     }
 }
 
@@ -77,4 +90,11 @@ enum class OrderStatus {
     CREATED,
     ASSIGNED,
     COMPLETED
+}
+
+sealed class OrderError(override val message: String) : BusinessError {
+    data object InvalidVolume : OrderError("Volume must be positive")
+    data object InvalidStatusForAssignment : OrderError("Only orders in CREATED status can be assigned")
+    data object InvalidStatusForCompletion : OrderError("Only assigned orders can be completed")
+    data object CourierNotAssigned : OrderError("Cannot complete an order without an assigned courier")
 }

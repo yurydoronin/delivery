@@ -8,6 +8,7 @@ import clients.geo.locationOrNull
 import delivery.application.ports.output.GeoServiceClientError
 import delivery.application.ports.output.GeoServiceClientPort
 import delivery.domain.kernel.Location
+import delivery.domain.kernel.LocationError
 import io.grpc.ManagedChannelBuilder
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Service
@@ -36,11 +37,14 @@ class GeoServiceClient(
                 .build()
         )
 
-        val location = response.locationOrNull
+        val grpcLocation = response.locationOrNull
             ?: raise(GeoServiceClientError.LocationNotFound)
 
-        location.toDomain()
+        grpcLocation.toDomain()
+            .mapLeft(GeoServiceClientError::InvalidLocation)
+            .bind()
     }
 }
 
-fun clients.geo.Location.toDomain() = Location.of(x, y)
+fun clients.geo.Location.toDomain(): Either<LocationError, Location> =
+    Location.of(x, y)
