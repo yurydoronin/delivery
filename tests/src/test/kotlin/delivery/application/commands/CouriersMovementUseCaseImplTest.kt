@@ -59,21 +59,48 @@ class CouriersMovementUseCaseImplTest {
     }
 
     @Test
-    fun `move couriers`() {
+    fun `move courier one tick towards order`() {
         // Arrange
-        val order1 = Order.of(UUID.randomUUID(), Location.restore(3, 3), 1).shouldBeRight()
-        val courier1 = Courier.of("Маша", 4, Location.restore(1,1)).shouldBeRight()
-        order1.assignToCourier(courier1.id)
+        val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
+        val courier = Courier.of("Маша", speed = 4, Location.restore(1, 1)).shouldBeRight()
 
-        every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier1)
-        every { orderRepository.findAllAssigned() } returns listOf(order1)
+        order.assignToCourier(courier.id)
+
+        every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
+        every { orderRepository.findAllAssigned() } returns listOf(order)
 
         // Act
         sut.execute().shouldBeRight()
 
         // Assert
-        courier1.location shouldBe order1.location
-        order1.status shouldBe OrderStatus.COMPLETED
+        courier.location shouldBe Location.restore(5, 1)
+        order.status shouldBe OrderStatus.ASSIGNED
+
+        verify { courierRepository.track(courier) }
+        verify { orderRepository.track(order) }
         verify { unitOfWork.commit() }
+    }
+
+    @Test
+    fun `move courier until delivery is done`() {
+        // Arrange
+        val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
+        val courier = Courier.of("Маша", 4, Location.restore(1, 1)).shouldBeRight()
+        order.assignToCourier(courier.id)
+
+        every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
+        every { orderRepository.findAllAssigned() } returns listOf(order)
+
+        val ticks = courier.calculateTimeToLocation(order.location)
+
+        // Act
+        repeat(ticks) {
+            sut.execute().shouldBeRight()
+        }
+
+        // Assert
+        courier.location shouldBe order.location
+        order.status shouldBe OrderStatus.COMPLETED
+        verify(exactly = ticks) { unitOfWork.commit() }
     }
 }
