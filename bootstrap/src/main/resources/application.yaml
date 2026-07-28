@@ -1,5 +1,11 @@
 server:
   port: 8082
+  shutdown: graceful # корректное завершение работы приложения (по умолчанию 30 сек)
+
+management:
+  health:
+    probes:
+      enable: true
 
 spring:
   application:
