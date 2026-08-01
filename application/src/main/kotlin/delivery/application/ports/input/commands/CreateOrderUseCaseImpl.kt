@@ -8,6 +8,7 @@ import delivery.application.ports.output.UnitOfWork
 import delivery.common.types.error.BusinessError
 import delivery.domain.model.order.Order
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CreateOrderUseCaseImpl(
@@ -16,6 +17,7 @@ class CreateOrderUseCaseImpl(
     private val unitOfWork: UnitOfWork
 ) : CreateOrderUseCase {
 
+    @Transactional
     override fun execute(command: CreateOrderCommand): Either<BusinessError, Unit> = either {
         val location = geoServiceClient.getLocation(command.street).bind()
         val order = Order.of(

@@ -31,7 +31,7 @@ class BasketConfirmedConsumer(
                     volume = event.volume
                 )
             ).fold(
-                ifLeft = { error -> log.error("Failed to create order: $error") },
+                ifLeft = { error -> log.error("Failed to create order: ${error.message}") },
                 ifRight = { log.info("Order created successfully for basketId=${event.basketId}") }
             )
         }.onFailure { ex ->

@@ -21,6 +21,7 @@ class DomainEventDispatcher(
     @Scheduled(fixedDelay = 500)
     @Transactional
     fun dispatch() {
+        //TODO(пакет из 100 записей откатится целиком, если 99 прошли, а на 100 упала ошибка - не хорошо)
         repository.findUnprocessedMessages()
             .takeIf { it.isNotEmpty() }
             ?.forEach { outboxMessage ->

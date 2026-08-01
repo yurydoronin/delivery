@@ -18,14 +18,15 @@ class CreateOrderController(
 ) {
     @PostMapping
     fun create(@RequestBody request: OrderCreationRequest): ResponseEntity<String> =
-        useCase.execute(request.toCommand()).fold(
-            ifLeft = { error ->
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.message)
-            },
-            ifRight = {
-                ResponseEntity.status(HttpStatus.CREATED).build()
-            }
-        )
+        useCase.execute(request.toCommand())
+            .fold(
+                ifLeft = { error ->
+                    ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error.message)
+                },
+                ifRight = {
+                    ResponseEntity.status(HttpStatus.CREATED).build()
+                }
+            )
 }
 
 /**
