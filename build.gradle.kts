@@ -1,3 +1,4 @@
+import com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
 plugins {
@@ -21,5 +22,15 @@ subprojects {
         extensions.configure<KotlinJvmProjectExtension> {
             jvmToolchain(25)
         }
+    }
+}
+
+// локальный запуск: ./gradlew dependencyUpdates --no-configuration-cache --no-parallel
+tasks.withType<DependencyUpdatesTask>().configureEach {
+    gradleReleaseChannel = "current" // только стабильные версии Gradle plugin
+
+    rejectVersionIf {
+        listOf("alpha", "beta", "rc", "snapshot")
+            .any { candidate.version.contains(it, ignoreCase = true) }
     }
 }

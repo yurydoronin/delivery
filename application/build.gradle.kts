@@ -15,7 +15,7 @@ dependencies {
     implementation(libs.postgresql)
 
     // Flyway
-    implementation("org.flywaydb:flyway-core:12.10.0")
+    implementation(libs.spring.boot.starter.flyway)
     runtimeOnly(libs.flyway.database.postgresql)
 
     implementation(libs.uuid.creator)
