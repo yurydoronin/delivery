@@ -4,7 +4,10 @@ import delivery.BaseRepositoryTest
 import delivery.application.ports.input.queries.ActiveOrdersError
 import delivery.application.ports.input.queries.GetActiveOrdersUseCaseImpl
 import delivery.domain.kernel.LocationTestData
+import delivery.domain.model.courier.CourierType
+import delivery.domain.model.courier.StoragePlaceType
 import delivery.domain.model.order.Order
+import delivery.domain.model.order.OrderStatus
 import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
@@ -27,18 +30,37 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             """
                 INSERT INTO couriers(
                     id,
-                    name,
+                    type,
                     speed,
                     location_x,
                     location_y
                 )
                 VALUES (?, ?, ?, ?, ?)
                 """.trimIndent(),
-            courierId, "Маша", 4, 1, 1
+            courierId, CourierType.WALKING.name, 4, 1, 1
+        )
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO storage_places(
+                id,
+                type,
+                total_volume,
+                order_id,
+                courier_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """.trimIndent(),
+            UUID.randomUUID(),
+            StoragePlaceType.BACKPACK.name,
+            StoragePlaceType.BACKPACK.volume,
+            null,
+            courierId
         )
 
         val order1 = Order.of(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
         val order2 = Order.of(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
+
         order1.assignToCourier(courierId)
 
         jdbcTemplate.update(
@@ -86,6 +108,8 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
 
         // Assert
         result.size shouldBe 2
+        order1.status shouldBe OrderStatus.ASSIGNED
+        order2.status shouldBe OrderStatus.CREATED
     }
 
     @Test

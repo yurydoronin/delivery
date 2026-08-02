@@ -13,66 +13,69 @@ import delivery.domain.model.order.Order
 import java.util.UUID
 import kotlin.math.abs
 
+/**
+ * Агрегат Курьер
+ *
+ * @property speed Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
+ * Скорость курьера зависит от наличия/отсутствия транспорта.
+ */
 class Courier private constructor(
     id: UUID,
-    val name: String,
-    /**
-     * Скорость измеряется количеством клеток, которые курьер может пройти за один шаг.
-     * Скорость курьера зависит от наличия/отсутствия транспорта.
-     */
+    val type: CourierType,
     val speed: Int,
     var location: Location,
 ) : Aggregate<UUID>(id) {
 
-    var storagePlaces = mutableListOf<StoragePlace>()
-        private set
+    val storagePlaces: List<StoragePlace>
+        field = mutableListOf()
 
     companion object {
-        // Каждый курьер владеет местом хранения "Сумка" объемом 10 литров
-        private const val VOLUME = 10
-
         fun of(
-            name: String,
+            type: CourierType,
             speed: Int,
             location: Location,
-            storageName: String = "Сумка"
-        ): Either<BusinessError, Courier> =
-            either {
-                ensure(name.isNotBlank()) { CourierError.InvalidName }
-                ensure(speed > 0) { CourierError.InvalidSpeed }
+        ): Either<BusinessError, Courier> = either {
 
-                val courier = Courier(
-                    id = UuidCreator.getTimeOrderedEpoch(),
-                    name = name,
-                    speed = speed,
-                    location = location,
-                )
-                val storagePlace = StoragePlaceName.fromName(storageName).bind()
-                courier.addStoragePlace(storagePlace, VOLUME)
-                courier
-            }
+            ensure(speed > 0) { CourierError.InvalidSpeed }
+
+            val courier = Courier(
+                id = UuidCreator.getTimeOrderedEpoch(),
+                type = type,
+                speed = speed,
+                location = location,
+            )
+
+            CourierStorageFactory
+                .create(type)
+                .forEach {
+                    courier.addStoragePlace(it).bind()
+                }
+
+            courier
+        }
 
         fun restore(
             id: UUID,
-            name: String,
+            type: CourierType,
             speed: Int,
             location: Location,
         ) = Courier(
             id = id,
-            name = name,
+            type = type,
             speed = speed,
             location = location,
         )
     }
 
+    /**
+     * Используется репозиторием при восстановлении агрегата из БД
+     */
     fun restoreStoragePlace(storagePlace: StoragePlace) {
-        this.storagePlaces.add(storagePlace)
+        storagePlaces += storagePlace
     }
 
-    fun addStoragePlace(name: StoragePlaceName, totalVolume: Int): Either<StorageError, Unit> = either {
-        storagePlaces.add(
-            StoragePlace.of(name, totalVolume).bind()
-        )
+    fun addStoragePlace(type: StoragePlaceType): Either<StorageError, Unit> = either {
+        storagePlaces += StoragePlace.of(type).bind()
     }
 
     fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> = either {
@@ -85,11 +88,13 @@ class Courier private constructor(
      * Курьер может взять заказ, если в одном из его мест хранения есть место.
      */
     fun canTakeOrder(order: Order): Boolean =
-        findAvailableStorage(order).isRight()
+        storagePlaces.any {
+            it.canStore(order.volume) == StorageCheck.Ok
+        }
 
     fun takeOrder(order: Order): Either<BusinessError, Unit> =
-        findAvailableStorage(order).flatMap { place ->
-            place.store(order.id, order.volume)
+        findAvailableStorage(order).flatMap { sp ->
+            sp.store(order.id, order.volume)
         }
 
     fun delivered(order: Order): Either<CourierError, Unit> = either {
@@ -128,6 +133,5 @@ class Courier private constructor(
 sealed class CourierError(override val message: String) : BusinessError {
     data object NoAvailableStorage : CourierError("No available storage for this order")
     data object OrderNotFound : CourierError("Order not found in any storage")
-    data object InvalidName : CourierError("Name must not be blank")
     data object InvalidSpeed : CourierError("Speed must be positive")
 }

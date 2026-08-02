@@ -1,7 +1,7 @@
 package delivery.application.ports.input.queries
 
 import arrow.core.Either
-import delivery.common.types.dto.LocationResult
+import delivery.application.dto.LocationResult
 import delivery.common.types.error.BusinessError
 import java.util.UUID
 

@@ -6,6 +6,7 @@ import delivery.application.ports.output.AggregateTracker
 import delivery.application.ports.output.UnitOfWork
 import delivery.domain.kernel.LocationTestData
 import delivery.domain.model.courier.Courier
+import delivery.domain.model.courier.CourierType
 import delivery.domain.model.order.Order
 import delivery.domain.model.order.OrderStatus
 import delivery.infrastructure.output.adapters.postgres.JdbcCourierRepository
@@ -53,7 +54,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
     fun `updates order status from created to assigned`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 2).shouldBeRight()
-        val courier = Courier.of("Вася", 2, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
 
         every { aggregateTracker.getTracked() } returns listOf(order, courier)
         unitOfWork.commit()
@@ -102,8 +103,8 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         every { aggregateTracker.getTracked() } returns listOf(order1, order2, order3)
         unitOfWork.commit()
 
-        val courier1 = Courier.of("Вася", 2, LocationTestData.random()).shouldBeRight()
-        val courier2 = Courier.of("Петя", 2, LocationTestData.random()).shouldBeRight()
+        val courier1 = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val courier2 = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
         jdbcCourierRepository.track(courier1)
         jdbcCourierRepository.track(courier2)
         every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)

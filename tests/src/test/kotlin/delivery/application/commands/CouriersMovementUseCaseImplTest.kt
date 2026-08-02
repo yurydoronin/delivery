@@ -8,6 +8,7 @@ import delivery.application.ports.output.UnitOfWork
 import delivery.domain.kernel.Location
 import delivery.domain.kernel.LocationTestData
 import delivery.domain.model.courier.Courier
+import delivery.domain.model.courier.CourierType
 import delivery.domain.model.order.Order
 import delivery.domain.model.order.OrderStatus
 import io.kotest.assertions.arrow.core.shouldBeLeft
@@ -47,7 +48,7 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `fails to move if no assigned orders`() {
         // Arrange
-        val courier = Courier.of("Маша", 1, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.of(CourierType.WALKING, 1, LocationTestData.random()).shouldBeRight()
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
         every { orderRepository.findAllAssigned() } returns emptyList()
 
@@ -62,7 +63,7 @@ class CouriersMovementUseCaseImplTest {
     fun `move courier one tick towards order`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
-        val courier = Courier.of("Маша", speed = 4, Location.restore(1, 1)).shouldBeRight()
+        val courier = Courier.of(CourierType.WALKING, speed = 4, Location.restore(1, 1)).shouldBeRight()
 
         order.assignToCourier(courier.id)
 
@@ -85,7 +86,7 @@ class CouriersMovementUseCaseImplTest {
     fun `move courier until delivery is done`() {
         // Arrange
         val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
-        val courier = Courier.of("Маша", 4, Location.restore(1, 1)).shouldBeRight()
+        val courier = Courier.of(CourierType.WALKING, 4, Location.restore(1, 1)).shouldBeRight()
         order.assignToCourier(courier.id)
 
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)

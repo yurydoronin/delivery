@@ -7,17 +7,15 @@ import com.github.f4b6a3.uuid.UuidCreator
 import delivery.common.types.base.DomainEntity
 import delivery.common.types.error.BusinessError
 import java.util.UUID
-import kotlin.enums.enumEntries
 
 /**
- * Место хранения заказа (рюкзак, багажник курьера)
+ * Место хранения заказа (рюкзак, багажник курьера).
+ *
+ * @property totalVolume допустимый объем места хранения.
  */
 class StoragePlace private constructor(
     id: UUID,
-    val name: StoragePlaceName,
-    /**
-     * Допустимый объем места хранения
-     */
+    val type: StoragePlaceType,
     val totalVolume: Int,
 ) : DomainEntity<UUID>(id) {
 
@@ -25,19 +23,27 @@ class StoragePlace private constructor(
         private set
 
     companion object {
-        fun of(name: StoragePlaceName, totalVolume: Int): Either<StorageError, StoragePlace> = either {
+        fun of(type: StoragePlaceType): Either<StorageError, StoragePlace> = either {
 
-            ensure(totalVolume > 0) { StorageError.InvalidVolume }
+            ensure(type.volume > 0) { StorageError.InvalidVolume }
 
-            StoragePlace(id = UuidCreator.getTimeOrderedEpoch(), name, totalVolume)
+            StoragePlace(
+                id = UuidCreator.getTimeOrderedEpoch(),
+                type = type,
+                totalVolume = type.volume,
+            )
         }
 
         fun restore(
             id: UUID,
-            name: StoragePlaceName,
+            type: StoragePlaceType,
             totalVolume: Int,
             orderId: UUID?,
-        ) = StoragePlace(id, name, totalVolume).apply {
+        ) = StoragePlace(
+            id = id,
+            type = type,
+            totalVolume = totalVolume
+        ).apply {
             this.orderId = orderId
         }
     }
@@ -76,31 +82,6 @@ class StoragePlace private constructor(
     }
 }
 
-enum class StoragePlaceName(val displayName: String) {
-    BACKPACK("Сумка"),
-    BICYCLE_BACKPACK("Вело-Сумка"),
-    BICYCLE_TRUNK("Вело-Багажник"),
-    CAR_BACKPACK("Авто-Сумка"),
-    CAR_TRUNK("Авто-Багажник"),
-    CAR_TRAILER("Авто-Прицеп");
-
-    companion object {
-        fun fromName(name: String): Either<StorageError, StoragePlaceName> = either {
-            entries.firstOrNull { it.displayName.equals(name, ignoreCase = true) }
-                ?: raise(StorageError.UnknownStoragePlace(name))
-        }
-
-        /**
-         * Используется при восстановлении из БД.
-         * Некорректное значение означает нарушение целостности данных.
-         */
-        fun restore(name: String): StoragePlaceName =
-            enumEntries<StoragePlaceName>()
-                .firstOrNull { it.name == name }
-                ?: error("Unknown storage place in database: $name")
-    }
-}
-
 sealed class StorageCheck {
     object Ok : StorageCheck()
     object Occupied : StorageCheck()
@@ -110,6 +91,5 @@ sealed class StorageCheck {
 sealed class StorageError(override val message: String) : BusinessError {
     data object Occupied : StorageError("Storage is already occupied")
     data object NotEnoughSpace : StorageError("Order volume exceeds storage capacity")
-    data class UnknownStoragePlace(val name: String) : StorageError("Unknown storage place: $name")
     data object InvalidVolume : StorageError("Total volume must be positive")
 }

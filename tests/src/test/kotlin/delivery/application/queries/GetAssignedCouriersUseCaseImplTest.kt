@@ -3,7 +3,10 @@ package delivery.application.queries
 import delivery.BaseRepositoryTest
 import delivery.application.ports.input.queries.AssignedCouriersError
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCaseImpl
-import delivery.common.types.dto.LocationResult
+import delivery.application.dto.CourierTypeResult
+import delivery.application.dto.LocationResult
+import delivery.domain.model.courier.CourierType
+import delivery.domain.model.courier.StoragePlaceType
 import io.kotest.assertions.arrow.core.shouldBeLeft
 import io.kotest.assertions.arrow.core.shouldBeRight
 import io.kotest.matchers.shouldBe
@@ -27,28 +30,64 @@ class GetAssignedCouriersUseCaseImplTest @Autowired constructor(
             """
         INSERT INTO couriers(
             id,
-            name,
+            type,
             speed,
             location_x,
             location_y
         )
         VALUES (?, ?, ?, ?, ?)
         """.trimIndent(),
-            courier1Id, "Маша", 4, 1, 1
+            courier1Id, CourierType.WALKING.name, 4, 1, 1
+        )
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO storage_places(
+                id,
+                type,
+                total_volume,
+                order_id,
+                courier_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """.trimIndent(),
+            UUID.randomUUID(),
+            StoragePlaceType.BACKPACK.name,
+            StoragePlaceType.BACKPACK.volume,
+            null,
+            courier1Id
         )
 
         jdbcTemplate.update(
             """
         INSERT INTO couriers(
             id,
-            name,
+            type,
             speed,
             location_x,
             location_y
         )
         VALUES (?, ?, ?, ?, ?)
         """.trimIndent(),
-            courier2Id, "Коля", 1, 2, 2
+            courier2Id, CourierType.WALKING.name, 1, 2, 2
+        )
+
+        jdbcTemplate.update(
+            """
+            INSERT INTO storage_places(
+                id,
+                type,
+                total_volume,
+                order_id,
+                courier_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """.trimIndent(),
+            UUID.randomUUID(),
+            StoragePlaceType.BICYCLE_BACKPACK.name,
+            StoragePlaceType.BICYCLE_BACKPACK.volume,
+            null,
+            courier2Id
         )
 
         jdbcTemplate.update(
@@ -72,7 +111,7 @@ class GetAssignedCouriersUseCaseImplTest @Autowired constructor(
         // Assert
         result.size shouldBe 1
         result.first().courierId shouldBe courier1Id
-        result.first().name shouldBe "Маша"
+        result.first().type shouldBe CourierTypeResult.WALKING
         result.first().location shouldBe LocationResult(1, 1)
     }
 

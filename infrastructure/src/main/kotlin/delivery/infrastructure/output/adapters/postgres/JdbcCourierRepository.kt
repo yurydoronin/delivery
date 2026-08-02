@@ -4,8 +4,9 @@ import delivery.application.ports.output.AggregateTracker
 import delivery.application.ports.output.CourierRepositoryPort
 import delivery.domain.kernel.Location
 import delivery.domain.model.courier.Courier
+import delivery.domain.model.courier.CourierType
 import delivery.domain.model.courier.StoragePlace
-import delivery.domain.model.courier.StoragePlaceName
+import delivery.domain.model.courier.StoragePlaceType
 import java.sql.ResultSet
 import java.util.UUID
 import org.springframework.jdbc.core.ResultSetExtractor
@@ -15,12 +16,12 @@ import org.springframework.stereotype.Repository
 private const val COURIERS_WITH_STORAGE_PLACES = """
     SELECT
         c.id,
-        c.name,
+        c.type,
         c.speed,
         c.location_x,
         c.location_y,
         sp.id   AS sp_id,
-        sp.name AS sp_name,
+        sp.type AS sp_type,
         sp.total_volume,
         sp.order_id
     FROM couriers c
@@ -81,18 +82,18 @@ class JdbcCourierRepository(
         // 1. Атомарный UPSERT курьера
         jdbcClient.sql(
             """
-            INSERT INTO couriers (id, name, speed, location_x, location_y)
-            VALUES (:id, :name, :speed, :locationX, :locationY)
+            INSERT INTO couriers (id, type, speed, location_x, location_y)
+            VALUES (:id, :type, :speed, :locationX, :locationY)
             ON CONFLICT (id) 
             DO UPDATE SET 
-                name = EXCLUDED.name,
+                type = EXCLUDED.type,
                 speed = EXCLUDED.speed,
                 location_x = EXCLUDED.location_x,
                 location_y = EXCLUDED.location_y
             """.trimIndent()
         )
             .param("id", courier.id)
-            .param("name", courier.name)
+            .param("type", courier.type.name)
             .param("speed", courier.speed)
             .param("locationX", courier.location.x)
             .param("locationY", courier.location.y)
@@ -107,12 +108,12 @@ class JdbcCourierRepository(
         courier.storagePlaces.forEach { storagePlace ->
             jdbcClient.sql(
                 """
-                INSERT INTO storage_places (id, name, total_volume, order_id, courier_id)
-                VALUES (:id, :name, :totalVolume, :orderId, :courierId)
+                INSERT INTO storage_places (id, type, total_volume, order_id, courier_id)
+                VALUES (:id, :type, :totalVolume, :orderId, :courierId)
                 """.trimIndent()
             )
                 .param("id", storagePlace.id)
-                .param("name", storagePlace.name.name)
+                .param("type", storagePlace.type.name)
                 .param("totalVolume", storagePlace.totalVolume)
                 .param("orderId", storagePlace.orderId)
                 .param("courierId", courier.id)
@@ -129,7 +130,7 @@ class JdbcCourierRepository(
             val courier = couriers.getOrPut(courierId) {
                 Courier.restore(
                     id = courierId,
-                    name = rs.getString("name"),
+                    type = CourierType.valueOf(rs.getString("type")),
                     speed = rs.getInt("speed"),
                     location = Location.restore(
                         rs.getInt("location_x"),
@@ -141,7 +142,7 @@ class JdbcCourierRepository(
             courier.restoreStoragePlace(
                 StoragePlace.restore(
                     id = UUID.fromString(rs.getString("sp_id")),
-                    name = StoragePlaceName.restore(rs.getString("sp_name")),
+                    type = StoragePlaceType.valueOf(rs.getString("sp_type")),
                     totalVolume = rs.getInt("total_volume"),
                     orderId = rs.getString("order_id")?.let(UUID::fromString)
                 )

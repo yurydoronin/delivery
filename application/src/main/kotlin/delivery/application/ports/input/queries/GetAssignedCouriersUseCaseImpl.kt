@@ -2,7 +2,8 @@ package delivery.application.ports.input.queries
 
 import arrow.core.Either
 import arrow.core.raise.either
-import delivery.common.types.dto.LocationResult
+import delivery.application.dto.CourierTypeResult
+import delivery.application.dto.LocationResult
 import delivery.common.types.error.BusinessError
 import delivery.domain.kernel.Location
 import java.util.UUID
@@ -18,7 +19,7 @@ class GetAssignedCouriersUseCaseImpl(
     @Transactional(readOnly = true)
     override fun execute(): Either<BusinessError, List<GetAssignedCouriersResult>> = either {
         val sql = """
-            SELECT c.id, c.name, c.location_x, c.location_y
+            SELECT c.id, c.type, c.location_x, c.location_y
             FROM couriers c
             WHERE EXISTS (
                 SELECT 1 FROM orders o
@@ -35,7 +36,7 @@ class GetAssignedCouriersUseCaseImpl(
 
             GetAssignedCouriersResult(
                 courierId = UUID.fromString(rs.getString("id")),
-                name = rs.getString("name"),
+                type = CourierTypeResult.valueOf(rs.getString("type")),
                 location = LocationResult(
                     x = domainLocation.x,
                     y = domainLocation.y

@@ -1,8 +1,9 @@
 package delivery.api.input.adapters.http
 
+import delivery.api.input.adapters.http.dto.CourierResponse
+import delivery.api.input.adapters.http.mapper.toResponse
 import delivery.application.ports.input.queries.GetAssignedCouriersResult
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCase
-import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +16,7 @@ class GetAssignedCouriersController(
     private val useCase: GetAssignedCouriersUseCase
 ) {
     @GetMapping
-    fun get(): ResponseEntity<List<GetAssignedCouriersResponse>> =
+    fun get(): ResponseEntity<List<CourierResponse>> =
         useCase.execute()
             .fold(
                 ifLeft = {
@@ -27,26 +28,12 @@ class GetAssignedCouriersController(
             )
 }
 
-/**
- * (DTO) HTTP-Response containing the list of assigned couriers
- */
-fun List<GetAssignedCouriersResult>.toResponse(): List<GetAssignedCouriersResponse> =
+fun List<GetAssignedCouriersResult>.toResponse(): List<CourierResponse> =
     map { it.toResponse() }
 
 fun GetAssignedCouriersResult.toResponse() =
-    GetAssignedCouriersResponse(
+    CourierResponse(
         id = courierId,
-        name = name,
-        location = CourierLocationResponse(
-            x = location.x,
-            y = location.y
-        )
+        type = type.toResponse(),
+        location = location.toResponse()
     )
-
-data class CourierLocationResponse(val x: Int, val y: Int)
-data class GetAssignedCouriersResponse(
-    val id: UUID,
-    val name: String,
-    val location: CourierLocationResponse
-)
-

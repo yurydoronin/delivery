@@ -1,4 +1,4 @@
-package delivery.common.types.dto
+package delivery.application.dto
 
 data class LocationResult(
     val x: Int,

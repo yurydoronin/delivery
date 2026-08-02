@@ -1,8 +1,9 @@
 package delivery.api.input.adapters.http
 
+import delivery.api.input.adapters.http.dto.CourierResponse
+import delivery.api.input.adapters.http.mapper.toResponse
 import delivery.application.ports.input.queries.GetAllCouriersResult
 import delivery.application.ports.input.queries.GetAllCouriersUseCase
-import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +16,7 @@ class GetCouriersController(
     private val useCase: GetAllCouriersUseCase
 ) {
     @GetMapping
-    fun get(): ResponseEntity<List<GetAllCouriersResponse>> =
+    fun get(): ResponseEntity<List<CourierResponse>> =
         useCase.execute()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
@@ -26,23 +27,12 @@ class GetCouriersController(
 /**
  * (DTO) HTTP-Response containing the list of all couriers
  */
-fun List<GetAllCouriersResult>.toResponse(): List<GetAllCouriersResponse> =
+fun List<GetAllCouriersResult>.toResponse(): List<CourierResponse> =
     map { it.toResponse() }
 
 fun GetAllCouriersResult.toResponse() =
-    GetAllCouriersResponse(
+    CourierResponse(
         id = courierId,
-        name = name,
-        location = LocationResponse(
-            x = location.x,
-            y = location.y
-        )
+        type = type.toResponse(),
+        location = location.toResponse()
     )
-
-data class LocationResponse(val x: Int, val y: Int)
-data class GetAllCouriersResponse(
-    val id: UUID,
-    val name: String,
-    val location: LocationResponse
-)
-

@@ -10,7 +10,7 @@ import delivery.domain.model.order.OrderStatus
 
 class OrderDispatcherImpl : OrderDispatcher {
 
-    override fun dispatch(order: Order, couriers: List<Courier>): Either<DispatchError, Courier> = either {
+    override fun dispatch(order: Order, couriers: List<Courier>): Either<BusinessError, Courier> = either {
         ensure(order.status == OrderStatus.CREATED) {
             DispatchError.ValidationError
         }

@@ -1,8 +1,9 @@
 package delivery.api.input.adapters.http
 
+import delivery.api.input.adapters.http.dto.OrdersResponse
+import delivery.api.input.adapters.http.mapper.toResponse
 import delivery.application.ports.input.queries.GetActiveOrdersResult
 import delivery.application.ports.input.queries.GetActiveOrdersUseCase
-import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,7 +16,7 @@ class GetActiveOrdersController(
     private val useCase: GetActiveOrdersUseCase
 ) {
     @GetMapping
-    fun get(): ResponseEntity<List<ActiveOrdersResponse>> =
+    fun get(): ResponseEntity<List<OrdersResponse>> =
         useCase.execute()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
@@ -26,20 +27,11 @@ class GetActiveOrdersController(
 /**
  * (DTO) HTTP-Response containing the list of active orders
  */
-fun List<GetActiveOrdersResult>.toResponse(): List<ActiveOrdersResponse> =
+fun List<GetActiveOrdersResult>.toResponse(): List<OrdersResponse> =
     map { it.toResponse() }
 
-fun GetActiveOrdersResult.toResponse(): ActiveOrdersResponse =
-    ActiveOrdersResponse(
+fun GetActiveOrdersResult.toResponse(): OrdersResponse =
+    OrdersResponse(
         id = orderId,
-        location = OrderLocationResponse(
-            x = location.x,
-            y = location.y
-        )
+        location = location.toResponse()
     )
-
-data class OrderLocationResponse(val x: Int, val y: Int)
-data class ActiveOrdersResponse(
-    val id: UUID,
-    val location: OrderLocationResponse
-)

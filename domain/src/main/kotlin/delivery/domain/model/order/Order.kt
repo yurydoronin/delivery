@@ -12,7 +12,7 @@ import delivery.domain.model.order.events.OrderCreatedDomainEvent
 import java.util.UUID
 
 /**
- * Заказ
+ * Агрегат Заказ
  */
 class Order private constructor(
     id: UUID,
@@ -46,7 +46,6 @@ class Order private constructor(
                     )
                 }
         }
-
 
         fun restore(
             id: UUID,

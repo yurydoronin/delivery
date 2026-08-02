@@ -2,13 +2,13 @@ package delivery.api
 
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
-import delivery.api.input.adapters.http.ActiveOrdersResponse
 import delivery.api.input.adapters.http.GetActiveOrdersController
-import delivery.api.input.adapters.http.OrderLocationResponse
+import delivery.api.input.adapters.http.dto.LocationResponse
+import delivery.api.input.adapters.http.dto.OrdersResponse
+import delivery.application.dto.LocationResult
 import delivery.application.ports.input.queries.ActiveOrdersError
 import delivery.application.ports.input.queries.GetActiveOrdersResult
 import delivery.application.ports.input.queries.GetActiveOrdersUseCase
-import delivery.common.types.dto.LocationResult
 import io.mockk.every
 import java.util.UUID
 import kotlin.test.Test
@@ -38,7 +38,7 @@ class GetActiveOrdersControllerContractTest @Autowired constructor(
 
         val expectedJson = objectMapper.writeValueAsString(
             listOf(
-                ActiveOrdersResponse(result.orderId, OrderLocationResponse(1, 1))
+                OrdersResponse(result.orderId, LocationResponse(1, 1))
             )
         )
 

@@ -2,13 +2,15 @@ package delivery.api
 
 import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
-import delivery.api.input.adapters.http.CourierLocationResponse
 import delivery.api.input.adapters.http.GetAssignedCouriersController
-import delivery.api.input.adapters.http.GetAssignedCouriersResponse
+import delivery.api.input.adapters.http.dto.CourierResponse
+import delivery.api.input.adapters.http.dto.CourierTypeResponse
+import delivery.api.input.adapters.http.dto.LocationResponse
+import delivery.application.dto.CourierTypeResult
+import delivery.application.dto.LocationResult
 import delivery.application.ports.input.queries.AssignedCouriersError
 import delivery.application.ports.input.queries.GetAssignedCouriersResult
 import delivery.application.ports.input.queries.GetAssignedCouriersUseCase
-import delivery.common.types.dto.LocationResult
 import io.mockk.every
 import java.util.UUID
 import kotlin.test.Test
@@ -33,13 +35,13 @@ class GetAssignedCouriersControllerContractTest @Autowired constructor(
     fun `get assigned couriers`() {
         // Arrange
         val courierId = UUID.randomUUID()
-        val result = GetAssignedCouriersResult(courierId, "Вася", LocationResult(1, 1))
+        val result = GetAssignedCouriersResult(courierId, CourierTypeResult.WALKING, LocationResult(1, 1))
 
         every { useCase.execute() } returns Either.Right(listOf(result))
 
         val expectedJson = objectMapper.writeValueAsString(
             listOf(
-                GetAssignedCouriersResponse(courierId, "Вася", CourierLocationResponse(1, 1))
+                CourierResponse(courierId, CourierTypeResponse.WALKING, LocationResponse(1, 1))
             )
         )
 
