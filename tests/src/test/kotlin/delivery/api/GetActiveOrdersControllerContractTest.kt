@@ -4,7 +4,7 @@ import arrow.core.Either
 import com.ninjasquad.springmockk.MockkBean
 import delivery.api.input.adapters.http.GetActiveOrdersController
 import delivery.api.input.adapters.http.dto.LocationResponse
-import delivery.api.input.adapters.http.dto.OrdersResponse
+import delivery.api.input.adapters.http.dto.OrderResponse
 import delivery.application.dto.LocationResult
 import delivery.application.ports.input.queries.ActiveOrdersError
 import delivery.application.ports.input.queries.GetActiveOrdersResult
@@ -38,7 +38,7 @@ class GetActiveOrdersControllerContractTest @Autowired constructor(
 
         val expectedJson = objectMapper.writeValueAsString(
             listOf(
-                OrdersResponse(result.orderId, LocationResponse(1, 1))
+                OrderResponse(result.orderId, LocationResponse(1, 1))
             )
         )
 

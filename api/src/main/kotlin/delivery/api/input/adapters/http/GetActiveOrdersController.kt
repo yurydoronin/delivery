@@ -1,6 +1,6 @@
 package delivery.api.input.adapters.http
 
-import delivery.api.input.adapters.http.dto.OrdersResponse
+import delivery.api.input.adapters.http.dto.OrderResponse
 import delivery.api.input.adapters.http.mapper.toResponse
 import delivery.application.ports.input.queries.GetActiveOrdersResult
 import delivery.application.ports.input.queries.GetActiveOrdersUseCase
@@ -16,7 +16,7 @@ class GetActiveOrdersController(
     private val useCase: GetActiveOrdersUseCase
 ) {
     @GetMapping
-    fun get(): ResponseEntity<List<OrdersResponse>> =
+    fun get(): ResponseEntity<List<OrderResponse>> =
         useCase.execute()
             .fold(
                 ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
@@ -27,11 +27,11 @@ class GetActiveOrdersController(
 /**
  * (DTO) HTTP-Response containing the list of active orders
  */
-fun List<GetActiveOrdersResult>.toResponse(): List<OrdersResponse> =
+fun List<GetActiveOrdersResult>.toResponse(): List<OrderResponse> =
     map { it.toResponse() }
 
-fun GetActiveOrdersResult.toResponse(): OrdersResponse =
-    OrdersResponse(
+fun GetActiveOrdersResult.toResponse(): OrderResponse =
+    OrderResponse(
         id = orderId,
         location = location.toResponse()
     )

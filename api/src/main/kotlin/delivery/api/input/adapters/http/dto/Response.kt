@@ -13,7 +13,7 @@ enum class CourierTypeResponse {
     CAR
 }
 
-data class OrdersResponse(
+data class OrderResponse(
     val id: UUID,
     val location: LocationResponse
 )
