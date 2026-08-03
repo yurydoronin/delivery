@@ -8,7 +8,19 @@ on:
   pull_request:
 
 jobs:
+  # 1. Сначала проверяем безопасность Gradle Wrapper
+  validate-wrapper:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v6
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+  # 2. Только после успешной проверки запускаем сборку и тесты
   test:
+    needs: validate-wrapper
     runs-on: ubuntu-latest
 
     steps:
