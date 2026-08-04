@@ -16,7 +16,7 @@ class DomainEventProcessor(
     private val objectMapper: ObjectMapper,
     private val handlers: DomainEventHandlerRegistry,
     private val outboxRepository: DomainEventOutboxPort,
-    private val atomicOperationPort: AtomicOperationPort,
+    private val atomicOperation: AtomicOperationPort,
 ) {
 
     private val log = LoggerFactory.getLogger(DomainEventProcessor::class.java)
@@ -27,7 +27,7 @@ class DomainEventProcessor(
             val eventObject = objectMapper.readValue(message.payload, eventClass) as? DomainEvent
                 ?: throw IllegalStateException("Invalid outbox message type: $eventClass")
 
-            return atomicOperationPort.execute {
+            return atomicOperation.execute {
                 handlers.handle(eventObject)
                     .map {
                         message.markAsProcessed()
