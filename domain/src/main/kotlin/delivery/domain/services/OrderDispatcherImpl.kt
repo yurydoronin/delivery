@@ -12,7 +12,7 @@ class OrderDispatcherImpl : OrderDispatcher {
 
     override fun dispatch(order: Order, couriers: List<Courier>): Either<BusinessError, Courier> = either {
         ensure(order.status == OrderStatus.CREATED) {
-            DispatchError.ValidationError
+            DispatchError.InvalidOrderStatusForAssignment
         }
 
         val winner = couriers
@@ -29,5 +29,5 @@ class OrderDispatcherImpl : OrderDispatcher {
 
 sealed class DispatchError(override val message: String) : BusinessError {
     data object NoAvailableCourier : DispatchError("No available courier can take this order")
-    data object ValidationError : DispatchError("Order must be in CREATED status")
+    data object InvalidOrderStatusForAssignment : DispatchError("Order must be in CREATED status")
 }

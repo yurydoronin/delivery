@@ -5,9 +5,9 @@ import arrow.core.raise.either
 import delivery.application.ports.input.commands.AssignOrderUseCase
 import delivery.common.types.error.BusinessError
 import delivery.domain.model.order.events.OrderCreatedDomainEvent
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
+@Component
 class OrderCreatedDomainEventHandler(
     private val assignCourierUseCase: AssignOrderUseCase
 ) : DomainEventHandler<OrderCreatedDomainEvent> {

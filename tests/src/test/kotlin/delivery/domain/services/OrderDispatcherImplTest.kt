@@ -62,4 +62,18 @@ class OrderDispatcherTest {
 
         result shouldBe DispatchError.NoAvailableCourier
     }
+
+    @Test
+    fun `fails to dispatch order when order status is not created`() {
+        val order = Order.of(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
+        val courier = Courier.of(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
+        order.assignToCourier(courier.id)
+
+        val result = OrderDispatcherImpl()
+            .dispatch(order, listOf(courier))
+            .shouldBeLeft()
+
+        result shouldBe DispatchError.InvalidOrderStatusForAssignment
+        order.status shouldBe OrderStatus.ASSIGNED
+    }
 }
