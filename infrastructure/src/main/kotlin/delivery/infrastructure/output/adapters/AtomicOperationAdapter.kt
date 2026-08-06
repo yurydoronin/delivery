@@ -2,7 +2,7 @@ package delivery.infrastructure.output.adapters
 
 import arrow.core.Either
 import delivery.application.ports.output.AtomicOperationPort
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.TransactionTemplate
@@ -24,19 +24,13 @@ class AtomicOperationAdapter(
         propagationBehavior = TransactionDefinition.PROPAGATION_REQUIRES_NEW
     }
 
-    private val log = LoggerFactory.getLogger(javaClass)
+    private val log = KotlinLogging.logger {}
 
     override fun <E, T> execute(block: () -> Either<E, T>): Either<E, T> =
         transactionTemplate.execute { status ->
-            when (val result = block()) {
-                is Either.Right -> result
-                is Either.Left -> {
-
-                    log.warn("Atomic operation rolled back. Reason: ${result.value}")
-
-                    status.setRollbackOnly()
-                    result
-                }
+            block().onLeft { error ->
+                log.warn { "Atomic operation rolled back. Reason: $error" }
+                status.setRollbackOnly()
             }
         }
 }

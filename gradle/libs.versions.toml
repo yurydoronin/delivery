@@ -9,6 +9,7 @@ flyway = "13.1.0"
 grpc = "1.83.1"
 protobuf = "4.35.1"
 jackson = "3.2.1"
+logging = "8.0.4"
 uuid-creator = "6.1.1"
 logbook = "4.1.0"
 
@@ -42,6 +43,9 @@ logbook-spring-boot-starter = { module = "org.zalando:logbook-spring-boot-starte
 
 spring-kafka = { module = "org.springframework.kafka:spring-kafka", version.ref = "spring-boot" }
 jackson-kotlin = { module = "tools.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
+
+# Logging
+kotlin-logging-jvm = { module = "io.github.oshai:kotlin-logging-jvm", version.ref = "logging" }
 
 # gRPC
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }

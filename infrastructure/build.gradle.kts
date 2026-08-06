@@ -17,6 +17,9 @@ dependencies {
 
     implementation(libs.spring.kafka)
 
+    // Logging
+    implementation(libs.kotlin.logging.jvm)
+
     // Arrow.Either
     implementation(libs.arrow.core)
 

@@ -18,6 +18,9 @@ dependencies {
 
     implementation(libs.jackson.kotlin)
 
+    // Logging
+    implementation(libs.kotlin.logging.jvm)
+
     // Arrow.Either
     implementation(libs.arrow.core)
 

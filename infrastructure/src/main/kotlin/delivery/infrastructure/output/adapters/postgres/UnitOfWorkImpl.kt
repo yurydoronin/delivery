@@ -11,7 +11,7 @@ import delivery.domain.model.order.Order
 import delivery.infrastructure.output.adapters.postgres.outbox.integrationEventType
 import delivery.infrastructure.output.adapters.postgres.outbox.isIntegrationEvent
 import delivery.infrastructure.output.adapters.postgres.outbox.toIntegrationEventPayload
-import org.slf4j.LoggerFactory
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
@@ -29,7 +29,7 @@ class UnitOfWorkImpl(
     private val objectMapper: ObjectMapper
 ) : UnitOfWork {
 
-    private val log = LoggerFactory.getLogger(UnitOfWorkImpl::class.java)
+    private val log = KotlinLogging.logger {}
     private val printer = JsonFormat.printer().alwaysPrintFieldsWithNoPresence().omittingInsignificantWhitespace()
 
     @Transactional
@@ -70,7 +70,7 @@ class UnitOfWorkImpl(
                 aggregate.clearDomainEvents()
             }
         } catch (e: Exception) {
-            log.error("UnitOfWork commit failed", e)
+            log.error(e) { "UnitOfWork commit failed" }
             throw e
         } finally {
             tracker.clear()
