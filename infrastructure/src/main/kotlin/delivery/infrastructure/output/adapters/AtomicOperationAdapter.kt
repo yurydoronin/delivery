@@ -7,6 +7,14 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.TransactionDefinition
 import org.springframework.transaction.support.TransactionTemplate
 
+/**
+ * Spring-реализация [AtomicOperationPort].
+ *
+ * Использует [TransactionTemplate] для выполнения каждой операции в отдельной
+ * транзакции (`PROPAGATION_REQUIRES_NEW`). При получении [Either.Left]
+ * помечает транзакцию на откат без выбрасывания исключения, сохраняя
+ * типизированную бизнес-ошибку.
+ */
 @Component
 class AtomicOperationAdapter(
     transactionTemplate: TransactionTemplate
