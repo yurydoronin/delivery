@@ -14,13 +14,20 @@ class DomainEventDispatcher(
 
     @Scheduled(fixedDelay = 500)
     fun dispatch() {
+        //TODO: подключить CircuitBreaker, чтобы не спамить базу каждые 500 мс, если та будет недоступна.
         repository.findUnprocessedMessages()
             .takeIf { it.isNotEmpty() }
             ?.forEach { message ->
-                processor.process(message)
-                    .onLeft { error ->
-                        log.warn("Domain event processing failed. id=${message.id}, type=${message.eventType}, reason=$error")
-                    }
+                runCatching {
+                    processor.process(message)
+                        .onLeft { error ->
+                            log.warn("Domain event processing failed. id=${message.id}, type=${message.eventType}, reason=$error")
+                        }
+                }.onFailure { e ->
+                    log.error(
+                        "Unexpected error while processing domain event. id=${message.id}, type=${message.eventType}", e
+                    )
+                }.getOrThrow()
             } ?: log.debug("No unprocessed outbox messages")
     }
 }
