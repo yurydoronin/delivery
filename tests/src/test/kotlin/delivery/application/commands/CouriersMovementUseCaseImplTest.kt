@@ -1,10 +1,13 @@
 package delivery.application.commands
 
+import arrow.core.Either
 import delivery.application.ports.input.commands.CouriersMovementUseCaseImpl
 import delivery.application.ports.input.commands.MovementError
 import delivery.application.ports.output.CourierRepositoryPort
 import delivery.application.ports.output.OrderRepositoryPort
 import delivery.application.ports.output.UnitOfWork
+import delivery.application.ports.output.atomic.AtomicOperationPort
+import delivery.common.types.error.BusinessError
 import delivery.domain.kernel.Location
 import delivery.domain.kernel.LocationTestData
 import delivery.domain.model.courier.Courier
@@ -18,19 +21,31 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import java.util.UUID
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class CouriersMovementUseCaseImplTest {
 
+    val atomicOperation: AtomicOperationPort = mockk(relaxUnitFun = true)
     val courierRepository: CourierRepositoryPort = mockk(relaxed = true)
     val orderRepository: OrderRepositoryPort = mockk(relaxed = true)
     val unitOfWork: UnitOfWork = mockk(relaxed = true)
 
     val sut = CouriersMovementUseCaseImpl(
+        atomicOperation,
         courierRepository,
         orderRepository,
         unitOfWork
     )
+
+    @BeforeEach
+    fun setUp(){
+        every {
+            atomicOperation.execute<BusinessError, Unit>(any(), any())
+        } answers {
+            secondArg<() -> Either<BusinessError, Unit>>()()
+        }
+    }
 
     @Test
     fun `fails to move if no couriers`() {

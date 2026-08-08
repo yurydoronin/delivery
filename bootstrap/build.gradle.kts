@@ -21,7 +21,6 @@ springBoot {
     mainClass.set("delivery.DeliveryApplicationKt")
 }
 
-
 /*
     Плагин io.spring.dependency-management по умолчанию переопределяет любые явно указанные версии в блоке dependencies,
     если они описаны в его BOM-файлах.

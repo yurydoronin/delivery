@@ -2,6 +2,7 @@ package delivery.application.ports.input.commands
 
 import arrow.core.Either
 import arrow.core.raise.either
+import delivery.application.ports.output.atomic.AtomicOperationPort
 import delivery.application.ports.output.CourierRepositoryPort
 import delivery.application.ports.output.OrderRepositoryPort
 import delivery.application.ports.output.UnitOfWork
@@ -9,44 +10,45 @@ import delivery.common.types.error.BusinessError
 import delivery.domain.model.order.Order
 import java.util.UUID
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CouriersMovementUseCaseImpl(
+    private val atomicOperation: AtomicOperationPort,
     private val courierRepository: CourierRepositoryPort,
     private val orderRepository: OrderRepositoryPort,
     private val unitOfWork: UnitOfWork
 ) : CouriersMovementUseCase {
 
-    @Transactional
-    override fun execute(): Either<BusinessError, Unit> = either {
-        // получаем только курьеров с заказами
-        val couriers = courierRepository.getCouriersWithAssignedOrders()
-            .takeIf { it.isNotEmpty() }
-            ?: raise(MovementError.NoCouriers)
+    override fun execute(): Either<BusinessError, Unit> =
+        atomicOperation.execute {
+            either {
+                // получаем только курьеров с заказами
+                val couriers = courierRepository.getCouriersWithAssignedOrders()
+                    .takeIf { it.isNotEmpty() }
+                    ?: raise(MovementError.NoCouriers)
 
-        // получаем заказы, назначенные на курьеров
-        val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
-            .associateBy { it.courierId!! }
-            .takeIf { it.isNotEmpty() }
-            ?: raise(MovementError.NoOrders)
+                // получаем заказы, назначенные на курьеров
+                val assignedOrders: Map<UUID, Order> = orderRepository.findAllAssigned()
+                    .associateBy { it.courierId!! }
+                    .takeIf { it.isNotEmpty() }
+                    ?: raise(MovementError.NoOrders)
 
-        couriers.forEach { courier ->
-            val order = assignedOrders[courier.id] // берем заказ по курьеру
+                couriers.forEach { courier ->
+                    val order = assignedOrders[courier.id] // берем заказ по курьеру
 
-            courier.move(order!!.location)
+                    courier.move(order!!.location)
 
-            if (courier.location == order.location) {
-                order.complete()
-                courier.delivered(order)
+                    if (courier.location == order.location) {
+                        order.complete()
+                        courier.delivered(order)
+                    }
+
+                    courierRepository.track(courier)
+                    orderRepository.track(order)
+                }
+                unitOfWork.commit()
             }
-
-            courierRepository.track(courier)
-            orderRepository.track(order)
         }
-
-        unitOfWork.commit()
-    }
 }
 
 sealed class MovementError(override val message: String) : BusinessError {

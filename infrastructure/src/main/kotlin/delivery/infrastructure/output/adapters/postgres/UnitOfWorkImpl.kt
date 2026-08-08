@@ -15,7 +15,6 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE
 import org.springframework.context.annotation.Scope
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 import tools.jackson.databind.ObjectMapper
 
 @Component
@@ -32,7 +31,6 @@ class UnitOfWorkImpl(
     private val log = KotlinLogging.logger {}
     private val printer = JsonFormat.printer().alwaysPrintFieldsWithNoPresence().omittingInsignificantWhitespace()
 
-    @Transactional
     override fun commit() {
         try {
             tracker.getTracked().forEach { aggregate ->
