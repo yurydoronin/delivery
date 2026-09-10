@@ -18,9 +18,9 @@ class GetActiveOrdersUseCaseImpl(
     @Transactional(readOnly = true)
     override fun execute(): Either<BusinessError, List<GetActiveOrdersResult>> = either {
         val sql = """
-            SELECT o.id, o.location_x, o.location_y
-            FROM orders o
-            WHERE o.status <> 'COMPLETED'
+            SELECT id, location_x, location_y
+            FROM orders
+            WHERE status <> 'COMPLETED'
         """.trimIndent()
 
         val results = jdbcTemplate.query(sql) { rs, _ ->
