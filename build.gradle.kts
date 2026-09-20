@@ -30,7 +30,7 @@ tasks.withType<DependencyUpdatesTask>().configureEach {
     gradleReleaseChannel = "current" // только стабильные версии Gradle plugin
 
     rejectVersionIf {
-        listOf("alpha", "beta", "rc", "snapshot")
+        listOf("alpha", "beta", "rc", "snapshot", "M")
             .any { candidate.version.contains(it, ignoreCase = true) }
     }
 }

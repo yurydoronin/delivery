@@ -28,11 +28,11 @@ springBoot {
 */
 dependencyManagement {
     imports {
-        mavenBom("io.grpc:grpc-bom:1.83.1")
+        mavenBom("io.grpc:grpc-bom:1.84.0")
     }
     dependencies {
-        dependency("com.google.protobuf:protobuf-java:4.35.1")
-        dependency("com.google.protobuf:protobuf-java-util:4.35.1")
-        dependency("com.google.protobuf:protobuf-kotlin:4.35.1")
+        dependency("com.google.protobuf:protobuf-java:4.36.2")
+        dependency("com.google.protobuf:protobuf-java-util:4.36.2")
+        dependency("com.google.protobuf:protobuf-kotlin:4.36.2")
     }
 }

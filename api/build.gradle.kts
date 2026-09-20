@@ -47,9 +47,9 @@ tasks.register("printSrc") {
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:4.35.1" }
+    protoc { artifact = "com.google.protobuf:protoc:4.36.2" }
     plugins {
-        id("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:1.83.1" }
+        id("grpc") { artifact = "io.grpc:protoc-gen-grpc-java:1.84.0" }
     }
     generateProtoTasks {
         all().forEach { task ->
