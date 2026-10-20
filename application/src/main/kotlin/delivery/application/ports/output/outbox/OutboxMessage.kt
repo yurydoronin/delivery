@@ -12,13 +12,12 @@ data class OutboxMessage(
     val payload: String,
     val occurredOnUtc: Instant = Instant.now(Clock.systemUTC()),
 ) {
-    private var processedOnUtc: Instant? = null
+    var processedOnUtc: Instant? = null
+        private set
 
     fun markAsProcessed() {
         processedOnUtc = Instant.now(Clock.systemUTC())
     }
-
-    fun processedOnUtc(): Instant? = processedOnUtc
 
     companion object {
         fun restore(

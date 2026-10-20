@@ -69,7 +69,7 @@ class JdbcDomainOutboxRepository(
         )
             .param("id", message.id)
             .param(
-                "processedOnUtc", message.processedOnUtc()
+                "processedOnUtc", message.processedOnUtc
                     ?.let { Timestamp.from(it) }
             )
             .update()
