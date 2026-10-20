@@ -52,9 +52,9 @@ class AssignOrderUseCaseImplTest {
     fun `assigns order`() {
         either {
             // Arrange
-            val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 1).bind()
-            val courier1 = Courier.of(CourierType.WALKING, 3, LocationTestData.random()).bind()
-            val courier2 = Courier.of(CourierType.WALKING, 1, LocationTestData.random()).bind()
+            val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 1).bind()
+            val courier1 = Courier.with(CourierType.WALKING, 3, LocationTestData.random()).bind()
+            val courier2 = Courier.with(CourierType.WALKING, 1, LocationTestData.random()).bind()
             val couriers = listOf(courier1, courier2)
 
             every { orderRepository.findById(order.id) } returns order
@@ -93,7 +93,7 @@ class AssignOrderUseCaseImplTest {
     fun `fails to assign when no courier available`() {
         either {
             // Arrange
-            val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 1).bind()
+            val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 1).bind()
             val couriers = emptyList<Courier>()
 
             every { orderRepository.findById(order.id) } returns order

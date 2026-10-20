@@ -15,7 +15,7 @@ class OrderTest {
         val id = UUID.randomUUID()
         val location = LocationTestData.random()
 
-        val order = Order.of(id, location, 5).shouldBeRight()
+        val order = Order.with(id, location, 5).shouldBeRight()
 
         order.id shouldBe id
         order.location shouldBe location
@@ -29,7 +29,7 @@ class OrderTest {
         val id = UUID.randomUUID()
         val location = LocationTestData.random()
 
-        val result = Order.of(id, location, 0).shouldBeLeft()
+        val result = Order.with(id, location, 0).shouldBeLeft()
 
         result shouldBe OrderError.InvalidVolume
         result.message shouldBe "Volume must be positive"
@@ -37,7 +37,7 @@ class OrderTest {
 
     @Test
     fun `assigns order to courier`() {
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId = UUID.randomUUID()
 
         order.assignToCourier(courierId)
@@ -48,7 +48,7 @@ class OrderTest {
 
     @Test
     fun `fails when assigning already assigned order`() {
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId1 = UUID.randomUUID()
         val courierId2 = UUID.randomUUID()
         order.assignToCourier(courierId1)
@@ -62,7 +62,7 @@ class OrderTest {
 
     @Test
     fun `completes assigned order`() {
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId = UUID.randomUUID()
         order.assignToCourier(courierId)
 
@@ -74,7 +74,7 @@ class OrderTest {
 
     @Test
     fun `fails when completing non-assigned order`() {
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
 
         val result = order.complete().shouldBeLeft()
 

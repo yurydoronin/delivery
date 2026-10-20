@@ -22,7 +22,7 @@ class CreateOrderUseCaseImpl(
         atomicOperation.execute {
             either {
                 val location = geoServiceClient.getLocation(command.street).bind()
-                val order = Order.of(
+                val order = Order.with(
                     command.orderId,
                     location,
                     command.volume

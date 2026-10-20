@@ -23,7 +23,7 @@ class StoragePlace private constructor(
         private set
 
     companion object {
-        fun of(type: StoragePlaceType): Either<StorageError, StoragePlace> = either {
+        fun with(type: StoragePlaceType): Either<StorageError, StoragePlace> = either {
 
             ensure(type.volume > 0) { StorageError.InvalidVolume }
 

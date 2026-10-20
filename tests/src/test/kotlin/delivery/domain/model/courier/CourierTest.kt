@@ -14,7 +14,7 @@ class CourierTest {
     @Test
     fun `creates courier with default storage`() {
         val startLocation = LocationTestData.random()
-        val courier = Courier.of(CourierType.WALKING, 2, startLocation).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, startLocation).shouldBeRight()
 
         courier.type shouldBe CourierType.WALKING
         courier.speed shouldBe 2
@@ -27,7 +27,7 @@ class CourierTest {
 
     @Test
     fun `fails if speed is not positive`() {
-        val result = Courier.of(CourierType.WALKING, 0, LocationTestData.random()).shouldBeLeft()
+        val result = Courier.with(CourierType.WALKING, 0, LocationTestData.random()).shouldBeLeft()
 
         result shouldBe CourierError.InvalidSpeed
         result.message shouldBe "Speed must be positive"
@@ -37,9 +37,9 @@ class CourierTest {
     fun `finds available storage for order`() {
         // Arrange
         val startLocation = LocationTestData.random()
-        val courier = Courier.of(CourierType.WALKING, 2, startLocation).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, startLocation).shouldBeRight()
         val storageDefault = courier.storagePlaces.first()
-        val order = Order.of(UUID.randomUUID(), startLocation, 5).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), startLocation, 5).shouldBeRight()
 
         // Act
         val result = courier.findAvailableStorage(order).shouldBeRight()
@@ -53,8 +53,8 @@ class CourierTest {
     fun `fails to find storage for large order`() {
         // Arrange
         val startLocation = LocationTestData.random()
-        val courier = Courier.of(CourierType.WALKING, 2, startLocation).shouldBeRight()
-        val largeOrder = Order.of(UUID.randomUUID(), LocationTestData.random(), 15).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, startLocation).shouldBeRight()
+        val largeOrder = Order.with(UUID.randomUUID(), LocationTestData.random(), 15).shouldBeRight()
 
         // Act
         val result = courier.findAvailableStorage(largeOrder).shouldBeLeft()
@@ -67,8 +67,8 @@ class CourierTest {
     @Test
     fun `takes order successfully`() {
         // Arrange
-        val courier = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
 
         // Act
         courier.takeOrder(order).shouldBeRight()
@@ -82,8 +82,8 @@ class CourierTest {
     fun `completes order`() {
         // Arrange
         val startLocation = LocationTestData.random()
-        val courier = Courier.of(CourierType.WALKING, 2, startLocation).shouldBeRight()
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, startLocation).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         courier.takeOrder(order)
 
         // Act
@@ -96,8 +96,8 @@ class CourierTest {
     @Test
     fun `fails to complete order`() {
         // Arrange
-        val courier = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
 
         // Act
         val result = courier.delivered(order).shouldBeLeft()
@@ -109,8 +109,8 @@ class CourierTest {
 
     @Test
     fun `calculates time to location`() {
-        val courier = Courier.of(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
-        val target = Location.of(5, 5).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
+        val target = Location.with(5, 5).shouldBeRight()
 
         val result = courier.calculateTimeToLocation(target)
 
@@ -119,8 +119,8 @@ class CourierTest {
 
     @Test
     fun `moves towards target`() {
-        val courier = Courier.of(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
-        val target = Location.of(5, 5).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
+        val target = Location.with(5, 5).shouldBeRight()
 
         courier.move(target).shouldBeRight()
 

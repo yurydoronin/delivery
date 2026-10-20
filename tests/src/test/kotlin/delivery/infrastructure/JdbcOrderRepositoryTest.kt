@@ -35,7 +35,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
     @Test
     fun `add new order`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 3).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 3).shouldBeRight()
 
         // Act
         jdbcOrderRepository.track(order)
@@ -53,8 +53,8 @@ class JdbcOrderRepositoryTest @Autowired constructor(
     @Test
     fun `updates order status from created to assigned`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 2).shouldBeRight()
-        val courier = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 2).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
 
         every { aggregateTracker.getTracked() } returns listOf(order, courier)
         unitOfWork.commit()
@@ -76,7 +76,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
     @Test
     fun `get order by id`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), LocationTestData.random(), 10).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 10).shouldBeRight()
         jdbcOrderRepository.track(order)
         every { aggregateTracker.getTracked() } returns listOf(order)
         unitOfWork.commit()
@@ -94,17 +94,17 @@ class JdbcOrderRepositoryTest @Autowired constructor(
     @Test
     fun `find all assigned orders`() {
         // Arrange
-        val order1 = Order.of(UUID.randomUUID(), LocationTestData.random(), 1).shouldBeRight()
-        val order2 = Order.of(UUID.randomUUID(), LocationTestData.random(), 2).shouldBeRight()
-        val order3 = Order.of(UUID.randomUUID(), LocationTestData.random(), 3).shouldBeRight()
+        val order1 = Order.with(UUID.randomUUID(), LocationTestData.random(), 1).shouldBeRight()
+        val order2 = Order.with(UUID.randomUUID(), LocationTestData.random(), 2).shouldBeRight()
+        val order3 = Order.with(UUID.randomUUID(), LocationTestData.random(), 3).shouldBeRight()
         jdbcOrderRepository.track(order1)
         jdbcOrderRepository.track(order2)
         jdbcOrderRepository.track(order3)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2, order3)
         unitOfWork.commit()
 
-        val courier1 = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
-        val courier2 = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val courier1 = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val courier2 = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
         jdbcCourierRepository.track(courier1)
         jdbcCourierRepository.track(courier2)
         every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)

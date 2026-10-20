@@ -27,7 +27,7 @@ class Order private constructor(
         private set
 
     companion object {
-        fun of(
+        fun with(
             id: UUID,
             location: Location,
             volume: Int,

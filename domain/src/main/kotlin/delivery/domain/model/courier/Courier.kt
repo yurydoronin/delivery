@@ -30,7 +30,7 @@ class Courier private constructor(
         field = mutableListOf()
 
     companion object {
-        fun of(
+        fun with(
             type: CourierType,
             speed: Int,
             location: Location,
@@ -75,7 +75,7 @@ class Courier private constructor(
     }
 
     fun addStoragePlace(type: StoragePlaceType): Either<StorageError, Unit> = either {
-        storagePlaces += StoragePlace.of(type).bind()
+        storagePlaces += StoragePlace.with(type).bind()
     }
 
     fun findAvailableStorage(order: Order): Either<CourierError, StoragePlace> = either {
@@ -126,7 +126,7 @@ class Courier private constructor(
 
         val moveY = difY.coerceIn(-remainingSteps, remainingSteps)
 
-        location = Location.of(location.x + moveX, location.y + moveY).bind()
+        location = Location.with(location.x + moveX, location.y + moveY).bind()
     }
 }
 

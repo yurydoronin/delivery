@@ -20,7 +20,7 @@ data class Location private constructor(
 ) : ValueObject {
 
     companion object {
-        fun of(x: Int, y: Int): Either<LocationError, Location> = either {
+        fun with(x: Int, y: Int): Either<LocationError, Location> = either {
 
             ensure(x in MIN..MAX) { LocationError.InvalidX(x) }
             ensure(y in MIN..MAX) { LocationError.InvalidY(y) }

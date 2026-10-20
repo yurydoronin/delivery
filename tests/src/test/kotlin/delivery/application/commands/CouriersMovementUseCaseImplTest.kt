@@ -63,7 +63,7 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `fails to move if no assigned orders`() {
         // Arrange
-        val courier = Courier.of(CourierType.WALKING, 1, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 1, LocationTestData.random()).shouldBeRight()
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
         every { orderRepository.findAllAssigned() } returns emptyList()
 
@@ -77,8 +77,8 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `move courier one tick towards order`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
-        val courier = Courier.of(CourierType.WALKING, speed = 4, Location.restore(1, 1)).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, speed = 4, Location.restore(1, 1)).shouldBeRight()
 
         order.assignToCourier(courier.id)
 
@@ -100,8 +100,8 @@ class CouriersMovementUseCaseImplTest {
     @Test
     fun `move courier until delivery is done`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
-        val courier = Courier.of(CourierType.WALKING, 4, Location.restore(1, 1)).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 4, Location.restore(1, 1)).shouldBeRight()
         order.assignToCourier(courier.id)
 
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)

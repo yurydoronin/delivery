@@ -58,8 +58,8 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
             courierId
         )
 
-        val order1 = Order.of(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
-        val order2 = Order.of(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
+        val order1 = Order.with(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
+        val order2 = Order.with(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
 
         order1.assignToCourier(courierId)
 

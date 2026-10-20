@@ -33,7 +33,7 @@ class JdbcCourierRepositoryTest @Autowired constructor(
     @Test
     fun `add new courier`() {
         // Arrange
-        val courier = Courier.of(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 2, LocationTestData.random()).shouldBeRight()
 
         // Act
         jdbcCourierRepository.track(courier)
@@ -49,7 +49,7 @@ class JdbcCourierRepositoryTest @Autowired constructor(
     @Test
     fun `update existing courier`() {
         // Arrange
-        val courier = Courier.of(CourierType.BICYCLE, 3, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.with(CourierType.BICYCLE, 3, LocationTestData.random()).shouldBeRight()
         jdbcCourierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
@@ -71,7 +71,7 @@ class JdbcCourierRepositoryTest @Autowired constructor(
     @Test
     fun `get courier`() {
         // Arrange
-        val courier = Courier.of(CourierType.BICYCLE, 3, LocationTestData.random()).shouldBeRight()
+        val courier = Courier.with(CourierType.BICYCLE, 3, LocationTestData.random()).shouldBeRight()
         jdbcCourierRepository.track(courier)
         every { aggregateTracker.getTracked() } returns listOf(courier)
         unitOfWork.commit()
@@ -89,13 +89,13 @@ class JdbcCourierRepositoryTest @Autowired constructor(
     @Test
     fun `get available couriers`() {
         // Arrange
-        val order1 = Order.of(UUID.randomUUID(), Location.restore(5, 5), 10).shouldBeRight()
-        val order2 = Order.of(UUID.randomUUID(), Location.restore(6, 6), 50).shouldBeRight()
-        val order3 = Order.of(UUID.randomUUID(), Location.restore(7, 7), 100).shouldBeRight()
+        val order1 = Order.with(UUID.randomUUID(), Location.restore(5, 5), 10).shouldBeRight()
+        val order2 = Order.with(UUID.randomUUID(), Location.restore(6, 6), 50).shouldBeRight()
+        val order3 = Order.with(UUID.randomUUID(), Location.restore(7, 7), 100).shouldBeRight()
 
-        val free1 = Courier.of(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
-        val free2 = Courier.of(CourierType.BICYCLE, 2, Location.restore(2, 2)).shouldBeRight()
-        val busy = Courier.of(CourierType.CAR, 2, Location.restore(3, 3)).shouldBeRight()
+        val free1 = Courier.with(CourierType.WALKING, 2, Location.restore(1, 1)).shouldBeRight()
+        val free2 = Courier.with(CourierType.BICYCLE, 2, Location.restore(2, 2)).shouldBeRight()
+        val busy = Courier.with(CourierType.CAR, 2, Location.restore(3, 3)).shouldBeRight()
 
         busy.takeOrder(order1).shouldBeRight()
         busy.takeOrder(order2).shouldBeRight()

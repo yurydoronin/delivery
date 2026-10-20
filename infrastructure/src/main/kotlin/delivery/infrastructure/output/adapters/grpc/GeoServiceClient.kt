@@ -47,4 +47,4 @@ class GeoServiceClient(
 }
 
 fun clients.geo.Location.toDomain(): Either<LocationError, Location> =
-    Location.of(x, y)
+    Location.with(x, y)

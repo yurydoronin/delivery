@@ -16,10 +16,10 @@ class OrderDispatcherTest {
     @Test
     fun `assigns order to fastest available courier`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.restore(5, 5), 5).shouldBeRight()
-        val courier1 = Courier.of(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight() // медленный
-        val courier2 = Courier.of(CourierType.BICYCLE, 2, Location.restore(1, 1)).shouldBeRight()   // быстрый
-        val courier3 = Courier.of(CourierType.CAR, 2, Location.restore(10, 10)).shouldBeRight() // далеко
+        val order = Order.with(UUID.randomUUID(), Location.restore(5, 5), 5).shouldBeRight()
+        val courier1 = Courier.with(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight() // медленный
+        val courier2 = Courier.with(CourierType.BICYCLE, 2, Location.restore(1, 1)).shouldBeRight()   // быстрый
+        val courier3 = Courier.with(CourierType.CAR, 2, Location.restore(10, 10)).shouldBeRight() // далеко
 
         // Act
         val winner = listOf(courier1, courier2, courier3)
@@ -36,11 +36,11 @@ class OrderDispatcherTest {
     @Test
     fun `chooses courier with available storage when faster couriers are full`() {
         // Arrange
-        val order = Order.of(UUID.randomUUID(), Location.restore(5, 5), 40).shouldBeRight()
-        val courier1 = Courier.of(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight() // медленный
+        val order = Order.with(UUID.randomUUID(), Location.restore(5, 5), 40).shouldBeRight()
+        val courier1 = Courier.with(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight() // медленный
         val courier2 =
-            Courier.of(CourierType.BICYCLE, 2, Location.restore(1, 1)).shouldBeRight() // быстрейший, но нет места
-        val courier3 = Courier.of(CourierType.CAR, 2, Location.restore(10, 10))
+            Courier.with(CourierType.BICYCLE, 2, Location.restore(1, 1)).shouldBeRight() // быстрейший, но нет места
+        val courier3 = Courier.with(CourierType.CAR, 2, Location.restore(10, 10))
             .shouldBeRight() // далеко, но есть доп место (в багажнике)
 
         // Act
@@ -57,8 +57,8 @@ class OrderDispatcherTest {
 
     @Test
     fun `fails to dispatch when no courier has enough storage`() {
-        val order = Order.of(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
-        val courier = Courier.of(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
 
         val result = listOf(courier)
             .dispatch(order)
@@ -69,8 +69,8 @@ class OrderDispatcherTest {
 
     @Test
     fun `fails to dispatch order when order status is not created`() {
-        val order = Order.of(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
-        val courier = Courier.of(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
+        val order = Order.with(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
+        val courier = Courier.with(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
         order.assignToCourier(courier.id)
 
         val result = listOf(courier)

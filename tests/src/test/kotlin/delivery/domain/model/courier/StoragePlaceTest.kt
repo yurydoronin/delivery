@@ -11,7 +11,7 @@ class StoragePlaceTest {
 
     @Test
     fun `creates storage with correct properties`() {
-        val sp = StoragePlace.of(StoragePlaceType.BACKPACK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BACKPACK).shouldBeRight()
 
         sp.type shouldBe StoragePlaceType.BACKPACK
         sp.totalVolume shouldBe 10
@@ -21,14 +21,14 @@ class StoragePlaceTest {
 
     @Test
     fun `can store order if empty and fits`() {
-        val sp = StoragePlace.of(StoragePlaceType.BACKPACK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BACKPACK).shouldBeRight()
 
         sp.canStore(3) shouldBe StorageCheck.Ok
     }
 
     @Test
     fun `cannot store order if occupied`() {
-        val sp = StoragePlace.of(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5).shouldBeRight()
 
@@ -38,14 +38,14 @@ class StoragePlaceTest {
 
     @Test
     fun `cannot store order if volume exceeds capacity`() {
-        val sp = StoragePlace.of(StoragePlaceType.BACKPACK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BACKPACK).shouldBeRight()
 
         sp.canStore(20) shouldBe StorageCheck.NotEnoughSpace
     }
 
     @Test
     fun `cannot store another order if already occupied`() {
-        val sp = StoragePlace.of(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
         val orderId = UUID.randomUUID()
         sp.store(orderId, 8).shouldBeRight()
 
@@ -56,7 +56,7 @@ class StoragePlaceTest {
     @Test
     fun `fails to store if occupied`() {
         // Arrange
-        val sp = StoragePlace.of(StoragePlaceType.BACKPACK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BACKPACK).shouldBeRight()
         val firstOrder = UUID.randomUUID()
         sp.store(firstOrder, 5).shouldBeRight()
         val secondOrder = UUID.randomUUID()
@@ -72,7 +72,7 @@ class StoragePlaceTest {
     @Test
     fun `fails to store if volume exceeds capacity`() {
         // Arrange
-        val sp = StoragePlace.of(StoragePlaceType.BACKPACK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BACKPACK).shouldBeRight()
 
         // Act
         val result = sp.store(UUID.randomUUID(), 15).shouldBeLeft()
@@ -84,7 +84,7 @@ class StoragePlaceTest {
 
     @Test
     fun `clears order and frees storage`() {
-        val sp = StoragePlace.of(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
+        val sp = StoragePlace.with(StoragePlaceType.BICYCLE_TRUNK).shouldBeRight()
         val orderId = UUID.randomUUID()
         sp.store(orderId, 5).shouldBeRight()
 
