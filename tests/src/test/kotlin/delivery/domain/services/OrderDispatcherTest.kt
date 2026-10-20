@@ -71,7 +71,7 @@ class OrderDispatcherTest {
     fun `fails to dispatch order when order status is not created`() {
         val order = Order.with(UUID.randomUUID(), Location.restore(5, 5), 20).shouldBeRight()
         val courier = Courier.with(CourierType.WALKING, 1, Location.restore(1, 1)).shouldBeRight()
-        order.assignToCourier(courier.id)
+        order.assignToCourierWith(courier.id)
 
         val result = listOf(courier)
             .dispatch(order)

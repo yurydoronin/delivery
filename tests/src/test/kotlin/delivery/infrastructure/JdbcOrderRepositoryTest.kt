@@ -58,7 +58,7 @@ class JdbcOrderRepositoryTest @Autowired constructor(
 
         every { aggregateTracker.getTracked() } returns listOf(order, courier)
         unitOfWork.commit()
-        order.assignToCourier(courier.id)
+        order.assignToCourierWith(courier.id)
 
         // Act
         jdbcOrderRepository.track(order)
@@ -109,8 +109,8 @@ class JdbcOrderRepositoryTest @Autowired constructor(
         jdbcCourierRepository.track(courier2)
         every { aggregateTracker.getTracked() } returns listOf(courier1, courier2)
         unitOfWork.commit()
-        order1.assignToCourier(courier1.id)
-        order2.assignToCourier(courier2.id)
+        order1.assignToCourierWith(courier1.id)
+        order2.assignToCourierWith(courier2.id)
         jdbcOrderRepository.track(order1)
         jdbcOrderRepository.track(order2)
         every { aggregateTracker.getTracked() } returns listOf(order1, order2)

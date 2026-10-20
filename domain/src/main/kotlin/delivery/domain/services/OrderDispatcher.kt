@@ -22,7 +22,7 @@ fun List<Courier>.dispatch(order: Order): Either<BusinessError, Courier> = eithe
         ?: raise(DispatchError.NoAvailableCourier)
 
     winner.takeOrder(order)
-    order.assignToCourier(winner.id)
+    order.assignToCourierWith(winner.id)
 
     winner
 }

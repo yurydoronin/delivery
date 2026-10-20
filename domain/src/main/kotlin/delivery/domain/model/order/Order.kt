@@ -63,7 +63,7 @@ class Order private constructor(
         }
     }
 
-    fun assignToCourier(courierId: UUID): Either<OrderError, Unit> = either {
+    fun assignToCourierWith(courierId: UUID): Either<OrderError, Unit> = either {
         ensure(status == OrderStatus.CREATED) { OrderError.InvalidStatusForAssignment }
 
         this@Order.courierId = courierId

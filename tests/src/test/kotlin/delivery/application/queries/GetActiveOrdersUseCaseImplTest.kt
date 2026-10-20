@@ -61,7 +61,7 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
         val order1 = Order.with(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
         val order2 = Order.with(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
 
-        order1.assignToCourier(courierId)
+        order1.assignToCourierWith(courierId)
 
         jdbcTemplate.update(
             """

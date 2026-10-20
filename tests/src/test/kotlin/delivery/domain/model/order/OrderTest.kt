@@ -40,7 +40,7 @@ class OrderTest {
         val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId = UUID.randomUUID()
 
-        order.assignToCourier(courierId)
+        order.assignToCourierWith(courierId)
 
         order.status shouldBe OrderStatus.ASSIGNED
         order.courierId shouldBe courierId
@@ -51,9 +51,9 @@ class OrderTest {
         val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId1 = UUID.randomUUID()
         val courierId2 = UUID.randomUUID()
-        order.assignToCourier(courierId1)
+        order.assignToCourierWith(courierId1)
 
-        val result = order.assignToCourier(courierId2).shouldBeLeft()
+        val result = order.assignToCourierWith(courierId2).shouldBeLeft()
 
         result shouldBe OrderError.InvalidStatusForAssignment
         order.status shouldBe OrderStatus.ASSIGNED
@@ -64,7 +64,7 @@ class OrderTest {
     fun `completes assigned order`() {
         val order = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
         val courierId = UUID.randomUUID()
-        order.assignToCourier(courierId)
+        order.assignToCourierWith(courierId)
 
         order.complete()
 

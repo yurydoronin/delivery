@@ -80,7 +80,7 @@ class CouriersMovementUseCaseImplTest {
         val order = Order.with(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
         val courier = Courier.with(CourierType.WALKING, speed = 4, Location.restore(1, 1)).shouldBeRight()
 
-        order.assignToCourier(courier.id)
+        order.assignToCourierWith(courier.id)
 
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
         every { orderRepository.findAllAssigned() } returns listOf(order)
@@ -102,7 +102,7 @@ class CouriersMovementUseCaseImplTest {
         // Arrange
         val order = Order.with(UUID.randomUUID(), Location.restore(10, 10), 1).shouldBeRight()
         val courier = Courier.with(CourierType.WALKING, 4, Location.restore(1, 1)).shouldBeRight()
-        order.assignToCourier(courier.id)
+        order.assignToCourierWith(courier.id)
 
         every { courierRepository.getCouriersWithAssignedOrders() } returns listOf(courier)
         every { orderRepository.findAllAssigned() } returns listOf(order)
