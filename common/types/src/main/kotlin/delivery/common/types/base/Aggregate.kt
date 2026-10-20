@@ -4,15 +4,17 @@ abstract class Aggregate<ID : Any> protected constructor(
     id: ID,
 ) : DomainEntity<ID>(id), AggregateRoot<ID> {
 
-    private val _domainEvents: MutableList<DomainEvent> = mutableListOf()
+    val domainEvents: List<DomainEvent>
+        field = mutableListOf()
 
-    override fun allDomainEvents(): List<DomainEvent> = _domainEvents.toList()
+    override val allDomainEvents: List<DomainEvent>
+        get() = domainEvents
 
     override fun addDomainEvent(event: DomainEvent) {
-        _domainEvents.add(event)
+        domainEvents -= event
     }
 
     override fun clearDomainEvents() {
-        _domainEvents.clear()
+        domainEvents.clear()
     }
 }

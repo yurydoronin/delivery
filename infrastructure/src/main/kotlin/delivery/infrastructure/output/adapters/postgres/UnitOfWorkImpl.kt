@@ -39,7 +39,7 @@ class UnitOfWorkImpl(
                     is Order -> orderRepo.save(aggregate)
                 }
                 // Сохраняем события в domainEventOutbox и integrationEventOutbox
-                aggregate.allDomainEvents()
+                aggregate.allDomainEvents
                     .forEach { domainEvent ->
                         domainEventOutbox.save(
                             OutboxMessage(
