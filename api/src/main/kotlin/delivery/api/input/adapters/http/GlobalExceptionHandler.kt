@@ -16,7 +16,6 @@ class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException::class)
     fun handleIllegalArgument(ex: IllegalArgumentException): ResponseEntity<String> {
         log.warn { "Validation error: ${ex.message}" }
-
         return ResponseEntity
             .badRequest()
             .body(ex.message ?: "Invalid input")
@@ -25,7 +24,6 @@ class GlobalExceptionHandler {
     @ExceptionHandler(Exception::class)
     fun handleUnexpected(ex: Exception): ResponseEntity<String> {
         log.error(ex) { "Unhandled error: ${ex.message}" }
-
         return ResponseEntity
             .internalServerError()
             .body("Unexpected server error: ${ex.cause}")

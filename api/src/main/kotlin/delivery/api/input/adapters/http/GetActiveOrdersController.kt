@@ -19,8 +19,12 @@ class GetActiveOrdersController(
     fun get(): ResponseEntity<List<OrderResponse>> =
         useCase.execute()
             .fold(
-                ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
-                ifRight = { results -> ResponseEntity.ok(results.toResponse()) }
+                ifLeft = {
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                },
+                ifRight = { results ->
+                    ResponseEntity.ok(results.toResponse())
+                }
             )
 }
 

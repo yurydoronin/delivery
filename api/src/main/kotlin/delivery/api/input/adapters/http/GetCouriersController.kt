@@ -19,8 +19,12 @@ class GetCouriersController(
     fun get(): ResponseEntity<List<CourierResponse>> =
         useCase.execute()
             .fold(
-                ifLeft = { ResponseEntity.status(HttpStatus.NOT_FOUND).build() },
-                ifRight = { ResponseEntity.ok(it.toResponse()) }
+                ifLeft = {
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).build()
+                },
+                ifRight = {
+                    ResponseEntity.ok(it.toResponse())
+                }
             )
 }
 
