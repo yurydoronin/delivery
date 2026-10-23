@@ -1,3 +1,15 @@
+## Авторские права и условия использования / Copyright and Usage Restrictions
+
+© 2026 Yuriy Doronin. Все права защищены. / All rights reserved.
+
+**Русский**
+
+Репозиторий опубликован исключительно для ознакомления с портфолио и технической оценки. Без предварительного письменного разрешения правообладателя не допускается копирование, изменение, распространение или включение исходного кода в сторонние проекты, продукты и производственные системы, за исключением случаев, предусмотренных применимым законодательством и Условиями использования GitHub.
+
+**English**
+
+This repository is published solely for portfolio review and technical evaluation. Without the copyright holder's prior written permission, copying, modifying, distributing, or incorporating the source code into third-party projects, products, or production systems is not permitted, except where allowed by applicable law and the GitHub Terms of Service.
+
 ## 🛑 Дисклеймер для тимлидов и архитекторов
 
 Этот проект — манифест против **«Java в синтаксисе Kotlin»** и бездумного карго-культа: например, попыток реализовывать сложную и запутанную бизнес-логику на Go только потому, что «так проще».
