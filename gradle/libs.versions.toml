@@ -2,7 +2,7 @@
 
 kotlin = "2.4.21"
 
-spring-boot = "4.1.1"
+spring-boot = "4.1.2"
 arrow = "2.2.3"
 postgresql = "42.7.14"
 flyway = "13.11.1"
