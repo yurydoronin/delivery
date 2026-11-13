@@ -9,6 +9,7 @@ import org.springframework.kafka.annotation.KafkaListener
 import org.springframework.stereotype.Service
 import queues.basket.BasketConfirmedIntegrationEvent
 
+//TODO: BasketConfirmedConsumer должен быть идемпотентным (inbox)
 @Service
 class BasketConfirmedConsumer(
     private val useCase: CreateOrderUseCase

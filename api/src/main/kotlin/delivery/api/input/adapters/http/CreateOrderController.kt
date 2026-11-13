@@ -1,6 +1,7 @@
 package delivery.api.input.adapters.http
 
 import com.fasterxml.jackson.annotation.JsonProperty
+import delivery.api.input.adapters.kafka.BasketConfirmedConsumer
 import delivery.application.ports.input.commands.CreateOrderCommand
 import delivery.application.ports.input.commands.CreateOrderUseCase
 import java.util.UUID
@@ -11,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Deprecated(
+    message = "Создание заказа через HTTP устарело. Заказ создаётся после получения события BasketConfirmed от корзины."
+)
 @RestController
 @RequestMapping("/api/v1/orders")
 class CreateOrderController(
