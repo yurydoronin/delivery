@@ -16,7 +16,10 @@ class BasketConfirmedConsumer(
 ) {
     private val log = KotlinLogging.logger {}
 
-    @KafkaListener(topics = ["baskets.events"], groupId = "basket-group")
+    @KafkaListener(
+        topics = [$$"${app.kafka.basket-events-topic}"],
+        groupId = $$"${spring.kafka.consumer.group-id}"
+    )
     fun listen(message: String) {
         runCatching {
             val builder = BasketConfirmedIntegrationEvent.newBuilder()
@@ -41,6 +44,7 @@ class BasketConfirmedConsumer(
             )
         }.onFailure { ex ->
             log.error(ex) { ex.message }
-        }
+
+        }.getOrThrow()
     }
 }

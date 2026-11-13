@@ -3,9 +3,10 @@ server:
   shutdown: graceful # корректное завершение работы приложения (по умолчанию 30 сек)
 
 management:
-  health:
-    probes:
-      enable: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 spring:
   application:
