@@ -1,6 +1,6 @@
 package delivery.domain.model.courier
 
-fun CourierType.create(): List<StoragePlaceType> =
+fun CourierType.toStoragePlaceTypes(): List<StoragePlaceType> =
     when (this) {
         CourierType.WALKING ->
             listOf(

@@ -38,18 +38,16 @@ class Courier private constructor(
 
             ensure(speed > 0) { CourierError.InvalidSpeed }
 
-            val courier = Courier(
+            Courier(
                 id = UuidCreator.getTimeOrderedEpoch(),
                 type = type,
                 speed = speed,
                 location = location,
-            )
-            type.create()
-                .forEach {
-                    courier.addStoragePlace(it).bind()
+            ).apply {
+                type.toStoragePlaceTypes().forEach {
+                    addStoragePlace(it).bind()
                 }
-
-            courier
+            }
         }
 
         fun restore(
