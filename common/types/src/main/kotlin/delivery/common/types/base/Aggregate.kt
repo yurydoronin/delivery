@@ -11,7 +11,7 @@ abstract class Aggregate<ID : Any> protected constructor(
         get() = domainEvents
 
     override fun addDomainEvent(event: DomainEvent) {
-        domainEvents -= event
+        domainEvents += event
     }
 
     override fun clearDomainEvents() {
