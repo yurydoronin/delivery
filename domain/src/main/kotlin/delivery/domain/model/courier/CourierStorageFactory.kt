@@ -1,28 +1,39 @@
 package delivery.domain.model.courier
 
-object CourierStorageFactory {
+fun CourierType.create(): List<StoragePlaceType> =
+    when (this) {
+        CourierType.WALKING ->
+            listOf(
+                StoragePlaceType.BACKPACK
+            )
 
-    fun create(
-        type: CourierType
-    ): List<StoragePlaceType> =
-        when (type) {
+        CourierType.BICYCLE ->
+            listOf(
+                StoragePlaceType.BICYCLE_BACKPACK,
+                StoragePlaceType.BICYCLE_TRUNK
+            )
 
-            CourierType.WALKING ->
-                listOf(
-                    StoragePlaceType.BACKPACK
-                )
+        CourierType.CAR ->
+            listOf(
+                StoragePlaceType.CAR_BACKPACK,
+                StoragePlaceType.CAR_TRUNK,
+                StoragePlaceType.CAR_TRAILER
+            )
+    }
 
-            CourierType.BICYCLE ->
-                listOf(
-                    StoragePlaceType.BICYCLE_BACKPACK,
-                    StoragePlaceType.BICYCLE_TRUNK
-                )
+enum class CourierType {
+    WALKING,
+    BICYCLE,
+    CAR,
+}
 
-            CourierType.CAR ->
-                listOf(
-                    StoragePlaceType.CAR_BACKPACK,
-                    StoragePlaceType.CAR_TRUNK,
-                    StoragePlaceType.CAR_TRAILER
-                )
-        }
+enum class StoragePlaceType(
+    val volume: Int
+) {
+    BACKPACK(10),
+    BICYCLE_BACKPACK(10),
+    BICYCLE_TRUNK(30),
+    CAR_BACKPACK(10),
+    CAR_TRUNK(50),
+    CAR_TRAILER(100),
 }

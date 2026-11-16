@@ -44,9 +44,7 @@ class Courier private constructor(
                 speed = speed,
                 location = location,
             )
-
-            CourierStorageFactory
-                .create(type)
+            type.create()
                 .forEach {
                     courier.addStoragePlace(it).bind()
                 }
