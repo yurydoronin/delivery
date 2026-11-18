@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class GetAssignedCouriersUseCaseImpl(
-    private val jdbcTemplate: JdbcTemplate
+    private val jdbcTemplate: JdbcTemplate, //TODO: заменить на JdbcClient
 ) : GetAssignedCouriersUseCase {
 
     @Transactional(readOnly = true)
