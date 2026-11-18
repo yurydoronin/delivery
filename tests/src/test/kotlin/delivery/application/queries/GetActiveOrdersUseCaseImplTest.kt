@@ -14,11 +14,11 @@ import io.kotest.matchers.shouldBe
 import java.util.UUID
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.simple.JdbcClient
 
 class GetActiveOrdersUseCaseImplTest @Autowired constructor(
-    private val jdbcTemplate: JdbcTemplate,
-    private val sut: GetActiveOrdersUseCaseImpl
+    private val jdbcClient: JdbcClient,
+    private val sut: GetActiveOrdersUseCaseImpl,
 ) : BaseRepositoryTest() {
 
     @Test
@@ -26,82 +26,41 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
         // Arrange
         val courierId = UUID.randomUUID()
 
-        jdbcTemplate.update(
+        jdbcClient.sql(
             """
-                INSERT INTO couriers(
-                    id,
-                    type,
-                    speed,
-                    location_x,
-                    location_y
-                )
-                VALUES (?, ?, ?, ?, ?)
-                """.trimIndent(),
-            courierId, CourierType.WALKING.name, 4, 1, 1
+            INSERT INTO couriers(id, type, speed, location_x, location_y)
+            VALUES (:id, :type, :speed, :locationX, :locationY)
+            """.trimIndent()
         )
+            .param("id", courierId)
+            .param("type", CourierType.WALKING.name)
+            .param("speed", 4)
+            .param("locationX", 1)
+            .param("locationY", 1)
+            .update()
 
-        jdbcTemplate.update(
+        jdbcClient.sql(
             """
-            INSERT INTO storage_places(
-                id,
-                type,
-                total_volume,
-                order_id,
-                courier_id
-            )
-            VALUES (?, ?, ?, ?, ?)
-            """.trimIndent(),
-            UUID.randomUUID(),
-            StoragePlaceType.BACKPACK.name,
-            StoragePlaceType.BACKPACK.volume,
-            null,
-            courierId
+            INSERT INTO storage_places(id, type, total_volume, order_id, courier_id)
+            VALUES (:id, :type, :totalVolume, :orderId, :courierId)
+            """.trimIndent()
         )
+            .param("id", UUID.randomUUID())
+            .param("type", StoragePlaceType.BACKPACK.name)
+            .param("totalVolume", StoragePlaceType.BACKPACK.volume)
+            .param("orderId", null)
+            .param("courierId", courierId)
+            .update()
 
         val order1 = Order.with(UUID.randomUUID(), LocationTestData.random(), 4).shouldBeRight()
         val order2 = Order.with(UUID.randomUUID(), LocationTestData.random(), 7).shouldBeRight()
+        val completedOrder = Order.with(UUID.randomUUID(), LocationTestData.random(), 5).shouldBeRight()
 
         order1.assignToCourierWith(courierId)
 
-        jdbcTemplate.update(
-            """
-            INSERT INTO orders(
-                id,
-                location_x,
-                location_y,
-                volume,
-                status,
-                courier_id
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """.trimIndent(),
-            order1.id,
-            order1.location.x,
-            order1.location.y,
-            order1.volume,
-            order1.status.name,
-            order1.courierId
-        )
-
-        jdbcTemplate.update(
-            """
-            INSERT INTO orders(
-                id,
-                location_x,
-                location_y,
-                volume,
-                status,
-                courier_id
-            )
-            VALUES (?, ?, ?, ?, ?, ?)
-            """.trimIndent(),
-            order2.id,
-            order2.location.x,
-            order2.location.y,
-            order2.volume,
-            order2.status.name,
-            order2.courierId
-        )
+        insertOrder(order1)
+        insertOrder(order2)
+        insertOrder(completedOrder, OrderStatus.COMPLETED)
 
         // Act
         val result = sut.execute().shouldBeRight()
@@ -117,5 +76,24 @@ class GetActiveOrdersUseCaseImplTest @Autowired constructor(
         val result = sut.execute().shouldBeLeft()
 
         result shouldBe ActiveOrdersError.NoActiveOrders
+    }
+
+    private fun insertOrder(
+        order: Order,
+        status: OrderStatus = order.status,
+    ) {
+        jdbcClient.sql(
+            """
+            INSERT INTO orders(id, location_x, location_y, volume, status, courier_id)
+            VALUES (:id, :locationX, :locationY, :volume, :status, :courierId)
+            """.trimIndent()
+        )
+            .param("id", order.id)
+            .param("locationX", order.location.x)
+            .param("locationY", order.location.y)
+            .param("volume", order.volume)
+            .param("status", status.name)
+            .param("courierId", order.courierId)
+            .update()
     }
 }
