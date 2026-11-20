@@ -31,13 +31,11 @@ class GeoServiceClient(
     }
 
     override fun getLocation(street: String): Either<GeoServiceClientError, Location> = either {
-        val response = stub.getGeolocation(
+        val grpcLocation = stub.getGeolocation(
             GetGeolocationRequest.newBuilder()
                 .setStreet(street)
                 .build()
-        )
-
-        val grpcLocation = response.locationOrNull
+        ).locationOrNull
             ?: raise(GeoServiceClientError.LocationNotFound)
 
         grpcLocation.toDomain()
